@@ -1,6 +1,6 @@
 from git import *
 
-repos = ['udacity/ud867']
+repos = ['Idnan/bash-guide']
 
 
 # todo: load list of repos from file
