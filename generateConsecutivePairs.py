@@ -1,8 +1,6 @@
 from git import *
 
 repos = ['Idnan/bash-guide']
-
-
 # todo: load list of repos from file
 
 
@@ -10,6 +8,7 @@ def getConsecutivePRPairs(repo, prID, pull_list):
     pull_list = list(filter(lambda x: (int(x['number']) < int(prID)), pull_list))
     pull_list = sorted(pull_list, key=lambda x: int(x['number']), reverse=True)
     # set the number of pr pairs limitation
+    #todo: alternative: find pr pairs generated within a year
     pull_list = pull_list[:10]
 
     pull_list = [x['number'] for x in pull_list]
