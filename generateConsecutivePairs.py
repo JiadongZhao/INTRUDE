@@ -1,99 +1,55 @@
-import os
-import sys
 from git import *
-from sklearn.utils import shuffle
 
-getConsecutivePRPairs_flag = True
-
-repo_type = 'training'  # 'testing'
-# repo_type = 'testing'
-all_repos = ['mozilla-b2g/gaia', 'twbs/bootstrap', 'scikit-learn/scikit-learn', 'rust-lang/rust', 'servo/servo',
-             'pydata/pandas', 'saltstack/salt', 'nodejs/node', 'symfony/symfony-docs', 'zendframework/zf2',
-             'symfony/symfony', 'kubernetes/kubernetes', 'cocos2d/cocos2d-x', 'dotnet/corefx', 'django/django',
-             'angular/angular.js', 'JuliaLang/julia', 'ceph/ceph', 'joomla/joomla-cms', 'facebook/react',
-             'hashicorp/terraform', 'rails/rails', 'docker/docker', 'elastic/elasticsearch', 'emberjs/ember.js',
-             'ansible/ansible']
-
-msr_pr_pair = set()
-msr_repo_prList_map = {k: [] for k in all_repos}
-
-with open('data/msr_positive_pairs.txt') as f:
-    for t in f.readlines():
-        #         print(t)
-        r, n1, n2 = t.split()
-        if r in all_repos:
-            msr_pr_pair.add((r, n1, n2))
-            msr_repo_prList_map[r].append(n1)
-            msr_repo_prList_map[r].append(n2)
-
-gen_num = 0
+repos = ['udacity/ud867']
 
 
-def getConsecutiveNonDupPRPairs(repo, prID):
-    # get all pr
-    pull_list = get_repo_info(repo, 'pull')
+# todo: load list of repos from file
+
+
+def getConsecutivePRPairs(repo, prID, pull_list):
     pull_list = list(filter(lambda x: (int(x['number']) < int(prID)), pull_list))
     pull_list = sorted(pull_list, key=lambda x: int(x['number']), reverse=True)
-#     pull_list = pull_list[:10]
-    pull_list = pull_list[10:50]
+    # set the number of pr pairs limitation
+    pull_list = pull_list[:10]
+
     pull_list = [x['number'] for x in pull_list]
     pr_pair_list = []
+    for old_pr in pull_list:
+        old_pr = str(old_pr)
+        pr_pair_list.append((repo,str(prID), str(old_pr)))
     return pr_pair_list
 
 
-def work(file):
+def work():
     add_flag = False
 
     has = set()
-    if os.path.exists(file):
-        if not add_flag:
-            raise Exception('file already exists!')
-        with open(file) as f:
-            for t in f.readlines():
-                r, n = t.strip().split()
-                has.add((r, n))
 
     for repo in repos:
-        print('Generating PRs from', repo)
-        total = len(msr_repo_prList_map[repo])
-        print(str(total) + 'prs in total')
-        count = 1;
-        for msr_pr in msr_repo_prList_map[repo]:
-            print('current pr in MSR:' + msr_pr)
-            if getConsecutivePRPairs_flag:
-                result = getConsecutiveNonDupPRPairs(repo, msr_pr)
-#                 print(result)
-                count += 1
-                print(str(count)+'/'+str(total))
-                for pair in result:
-                    with open(file, 'a') as f:
-                        print("\t".join(pair), file=f)
-            else:
-                pulls = get_repo_info(repo, 'pull')
-                ps = shuffle(pulls)
+        file = 'data/consecutive_PR_pairs_' + repo.replace('/', '.') + '.txt'
+        # todo: change the dir path to DATA/
 
-                cnt = 0
-                with open(file, 'a+') as f:
-                    for p in ps:
-                        if check_large(p):
-                            continue
-                        if (repo, str(p['number'])) in has:
-                            continue
-                        cnt += 1
-                        print(repo, p['number'], file=f)
+        if os.path.exists(file):
+            if not add_flag:
+                raise Exception('file already exists!')
+            with open(file) as f:
+                for t in f.readlines():
+                    r, n = t.strip().split()
+                    has.add((r, n))
 
-                        if cnt == gen_num:
-                            break
+        # get all pr
+        pull_list = get_repo_info(repo, 'pull')
+        pull_list = sorted(pull_list, key=lambda x: int(x['number']), reverse=True)
+
+        for pull_element in pull_list:
+            pr_id = pull_element['number']
+            print('current pr :' + str(pr_id) + " in repo:" + repo)
+            # Get consecutive pr pairs
+            result = getConsecutivePRPairs(repo, pr_id, pull_list)
+            for pair in result:
+                with open(file, 'a') as f:
+                    print("\t".join(pair), file=f)
 
 
 if __name__ == "__main__":
-    if (len(sys.argv) == 1):
-        file = 'data/consecutive_NonDupPR_pairs_' + repo_type + '.txt'
-        gen_num = 100
-    else:
-        file = sys.argv[1].strip()
-        gen_num = int(sys.argv[2].strip())
-
-    print(file)
-    print(repo_type)
-    work(file)
+    work()

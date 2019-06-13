@@ -27,7 +27,7 @@ print('LOCAL_DATA_PATH:' + LOCAL_DATA_PATH)
 api = GitHub(app)
 @api.access_token_getter
 def token_getter():
-    access_token = 'c152dd684bc4e65d07ba80dfa321dbcd0e7823a0'
+    access_token = '933cf3080554fa938f9961c559bc92c3fa5c1af8'
      
     return access_token
 
