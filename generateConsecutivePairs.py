@@ -2,7 +2,7 @@ from git import *
 
 # load list of repos from file
 repos = [line.rstrip('\n') for line in open(".\\data\\test_repo_list.txt")]
-# repos = ['Idnan/bash-guide']
+#todo: set file based on OS
 
 
 def getConsecutivePRPairs(repo, prID, pull_list):
@@ -28,6 +28,7 @@ def work():
     for repo in repos:
         file = 'data/consecutive_PR_pairs_' + repo.replace('/', '.') + '.txt'
         # todo: change the dir path to DATA/
+        # todo: set file path by OS
 
         if os.path.exists(file):
             if not add_flag:
