@@ -1,11 +1,15 @@
 from git import *
+import init
 
-# load list of repos from file
-if (platform.system() == 'Windows'):
-    repos = [line.rstrip('\n') for line in open(".\\data\\test_repo_list.txt")]
-else:
-    repos = [line.rstrip('\n') for line in open("./data/test_repo_list.txt")]
-# repos = ['Idnan/bash-guide']
+
+# # load list of repos from file
+#
+# if (platform.system() == 'Windows'):
+#     repos = [line.rstrip('\n') for line in open(".\\data\\test_repo_list.txt")]
+# else:
+#     repos = [line.rstrip('\n') for line in open("./data/test_repo_list.txt")]
+# # repos = ['Idnan/bash-guide']
+#
 
 
 def getConsecutivePRPairs(repo, prID, pull_list):
@@ -39,9 +43,10 @@ def work():
 
     has = set()
 
-    for repo in repos:
-        file = 'data/consecutive_PR_pairs_' + repo.replace('/', '.') + '.txt'
+    for repo in init.repos:
+        file = init.PR_pairList_filePath_prefix + repo.replace('/', '.') + '.txt'
         # todo: change the dir path to DATA/
+        # todo: set file path by OS
 
         if os.path.exists(file):
             if not add_flag:
@@ -67,4 +72,5 @@ def work():
 
 
 if __name__ == "__main__":
+    init()
     work()
