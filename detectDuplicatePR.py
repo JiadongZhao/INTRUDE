@@ -11,13 +11,10 @@ detect.filter_out_too_big_pull_flag = False
 detect.filter_same_author_and_already_mentioned = True
 detect.filter_version_number_diff = True
 
-
-
-
 # For precision
-outfile = 'evaluation/random_sample_select_pr_result_0424.txt'
-with open(outfile, 'w') as outf:
-    pass
+# outfile = 'evaluation/random_sample_select_pr_result_0424.txt'
+# with open(outfile, 'w') as outf:
+#     pass
 
 cnt = 0
 
@@ -25,14 +22,12 @@ for repo in init.repos:
     file = init.PR_pairList_filePath_prefix + repo.replace('/', '.') + '.txt'
     with open(file) as f:
         for t in f.readlines():
-            #         r, n1 = t.split()
-            r, n1, n2, prob, result = t.split()
+            repo, pr_id = t.split()
             cnt += 1
-            #         if (cnt <= 2114):
-            #             continue
+            if (cnt < 20):
+                continue
 
-            n2, proba = detect.detect_one(r, n1)
-            with open(outfile, 'a') as outf:
-                print(r, n1, n2, proba, sep='\t', file=outf)
+            dupPR_id, similarity = detect.detect_one(repo, pr_id)
 
-
+            with open(init.dupPR_result_filePath_prefix + repo + '.txt', 'a') as outf:
+                print(repo, pr_id, dupPR_id, similarity, sep='\t', file=outf)

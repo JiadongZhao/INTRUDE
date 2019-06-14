@@ -19,7 +19,7 @@ app.config['GITHUB_CLIENT_SECRET'] = os.environ.get('GITHUB_CLIENT_SECRET')
 app.config['GITHUB_BASE_URL'] = 'https://api.github.com/'
 app.config['GITHUB_AUTH_URL'] = 'https://github.com/login/oauth/'
 
-init()
+
 LOCAL_DATA_PATH = init.LOCAL_DATA_PATH
 # if (platform.system() == 'Linux'):
 #     LOCAL_DATA_PATH = '/DATA/luyao'
