@@ -2,8 +2,8 @@ import os
 import re
 import requests
 from requests.adapters import HTTPAdapter
-from bs4 import BeautifulSoup
-from util import language_tool
+# from bs4 import BeautifulSoup
+# from util import language_tool
 
 def parse_diff(file_name, diff):
     parts = re.split('(@@.*?-.*?\+.*?@@)', diff)
