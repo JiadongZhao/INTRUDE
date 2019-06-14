@@ -5,6 +5,7 @@ import requests
 import platform
 
 import fetch_raw_diff
+import init
 
 from flask import Flask
 from flask_github import GitHub
@@ -18,12 +19,14 @@ app.config['GITHUB_CLIENT_SECRET'] = os.environ.get('GITHUB_CLIENT_SECRET')
 app.config['GITHUB_BASE_URL'] = 'https://api.github.com/'
 app.config['GITHUB_AUTH_URL'] = 'https://github.com/login/oauth/'
 
-if (platform.system() == 'Linux'):
-    LOCAL_DATA_PATH = '/DATA/luyao'
-elif (platform.system() == 'Windows'):
-    LOCAL_DATA_PATH = 'C:\\Users\\annik\\Documents\\REUSE\\INTRUDE\\PR_data' #backslashes are escape characters, so doubles are needed
-else:
-    LOCAL_DATA_PATH = '/Users/shuruiz/Work/researchProjects'
+init()
+LOCAL_DATA_PATH = init.LOCAL_DATA_PATH
+# if (platform.system() == 'Linux'):
+#     LOCAL_DATA_PATH = '/DATA/luyao'
+# elif (platform.system() == 'Windows'):
+#     LOCAL_DATA_PATH = 'C:\\Users\\annik\\Documents\\REUSE\\INTRUDE\\PR_data' #backslashes are escape characters, so doubles are needed
+# else:
+#     LOCAL_DATA_PATH = '/Users/shuruiz/Work/researchProjects'
 print('LOCAL_DATA_PATH:' + LOCAL_DATA_PATH)
 
 api = GitHub(app)
