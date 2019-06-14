@@ -1,4 +1,6 @@
 from git import *
+import init
+
 
 # load list of repos from file
 repos = [line.rstrip('\n') for line in open(".\\data\\test_repo_list.txt")]
@@ -26,7 +28,7 @@ def work():
     has = set()
 
     for repo in repos:
-        file = 'data/consecutive_PR_pairs_' + repo.replace('/', '.') + '.txt'
+        file = init.PR_pairList_filePath_prefix + repo.replace('/', '.') + '.txt'
         # todo: change the dir path to DATA/
         # todo: set file path by OS
 
@@ -53,4 +55,5 @@ def work():
 
 
 if __name__ == "__main__":
+    init()
     work()
