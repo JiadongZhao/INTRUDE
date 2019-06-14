@@ -1,7 +1,7 @@
 from git import *
 
 # load list of repos from file
-repos = [line.rstrip('\n') for line in open(data/test_repo_list.txt)]
+repos = [line.rstrip('\n') for line in open(".\\data\\test_repo_list.txt")]
 # repos = ['Idnan/bash-guide']
 
 

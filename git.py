@@ -21,7 +21,7 @@ app.config['GITHUB_AUTH_URL'] = 'https://github.com/login/oauth/'
 if (platform.system() == 'Linux'):
     LOCAL_DATA_PATH = '/DATA/luyao'
 elif (platform.system() == 'Windows'):
-    LOCAL_DATA_PATH = 'C:\Users\annik\Documents\REUSE\INTRUDE\PR_data'
+    LOCAL_DATA_PATH = 'C:\\Users\\annik\\Documents\\REUSE\\INTRUDE\\PR_data' #backslashes are escape characters, so doubles are needed
 else:
     LOCAL_DATA_PATH = '/Users/shuruiz/Work/researchProjects'
 print('LOCAL_DATA_PATH:' + LOCAL_DATA_PATH)
