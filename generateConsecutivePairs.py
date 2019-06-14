@@ -16,9 +16,10 @@ def getConsecutivePRPairs(repo, prID, pull_list):
     num = 0
     date = ''
     for pull_element in pull_list:
-        if num == 0:
+        if pull_element['number'] == prID:
             date = pull_element['created_at']
-            date = date[:3] + str(int(date[3], 10) - 1) + date[4:]  # set date to one year earlier than the PR date
+    date = str(int(date[:4], 10) - 1) + date[4:]  # set date to one year earlier than the PR date
+    for pull_element in pull_list:
         num += 1                                                    # iterate counter for size of new pull list
         if pull_element['created_at'] < date:                       # once we get to PRs older than a year, break and create new pull list
             pull_list = pull_list[:num]
@@ -53,8 +54,8 @@ def work():
         # get all pr
         pull_list = get_repo_info(repo, 'pull')
         pull_list = sorted(pull_list, key=lambda x: int(x['number']), reverse=True)
-        # for pull in pull_list:
-            # print(pull)
+        for pull in pull_list:
+            print(pull)
         for pull_element in pull_list:
             pr_id = pull_element['number']
             print('current pr :' + str(pr_id) + " in repo:" + repo)
