@@ -29,5 +29,5 @@ for repo in init.repos:
 
             dupPR_id, similarity = detect.detect_one(repo, pr_id)
 
-            with open(init.dupPR_result_filePath_prefix + repo + '.txt', 'a') as outf:
+            with open(init.dupPR_result_filePath_prefix + repo.replace('/', '.') + '.txt', 'a') as outf:
                 print(repo, pr_id, dupPR_id, similarity, sep='\t', file=outf)
