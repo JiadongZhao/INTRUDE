@@ -15,6 +15,7 @@ else:
         LOCAL_DATA_PATH = '/Users/shuruiz/Work/researchProjects'
     monitored_repoList_filePath = 'data/2000forks-repoList.csv'
     PR_pairList_filePath_prefix = 'data/consecutive_PR_pairs_'
+    PR_candidate_List_filePath_prefix = 'data/candidate_PR_'
     repos = [line.rstrip('\n') for line in open("./data/test_repo_list.txt")]
     # dupPR_result_filePath_prefix = LOCAL_DATA_PATH + '/dupPR_'
     dupPR_result_filePath_prefix = 'data/dupPR_'
