@@ -4,8 +4,6 @@ import init
 import util.timeUtil
 import datetime
 
-
-
 import detect
 detect.speed_up = True
 detect.filter_larger_number = True
@@ -18,6 +16,7 @@ detect.filter_same_author_and_already_mentioned = True
 detect.filter_version_number_diff = True
 
 add_flag = True
+
 
 def getCandidatePRs(repo):
     candidatePR_input_file = init.PR_candidate_List_filePath_prefix + repo.replace('/', '.') + '.txt'
@@ -41,6 +40,9 @@ def getCandidatePRs(repo):
 
         # get date for today, if the pr was created 1 yr ago, then stop
         now = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
+        if (current_pr['state'] == 'closed'):
+            continue
+
         if (util.timeUtil.days_between(now, current_pr_createdAt) > init.pr_date_difference_inDays):
             break
         print('current pr :' + str(
@@ -66,13 +68,11 @@ def work():
             for t in f.readlines():
                 repo, pr_id = t.split()
                 cnt += 1
-                # if (cnt < 20):
-                #     continue
-
                 dupPR_id, similarity = detect.detect_one(repo, pr_id)
 
                 with open(init.dupPR_result_filePath_prefix + repo.replace('/', '.') + '.txt', 'a') as outf:
                     print(repo, pr_id, dupPR_id, similarity, sep='\t', file=outf)
+
 
 if __name__ == "__main__":
     work()

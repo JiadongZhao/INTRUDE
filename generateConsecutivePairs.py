@@ -50,6 +50,7 @@ def getConsecutivePRPairs(repo, current_pr, pull_list):
         # if the created dates of these 2 prs are within a year, then compare
         if (util.timeUtil.days_between(current_pr_createdAt, previous_PR_date) < init.pr_date_difference_inDays):
             pr_pair_list.append((repo, str(current_pr_id), str(pull_element['number'])))
+            print(str(pull_element['number']))
         else:
             break
     return pr_pair_list
