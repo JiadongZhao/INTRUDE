@@ -94,7 +94,7 @@ def get_topK(repo, num1, topK=10, print_progress=False, use_way='new'):
 
         if filter_out_too_old_pull_flag:
             if abs((get_time(pullA["updated_at"]) - \
-                    get_time(pull["updated_at"])).days) >= 5 * 365: # more than 4 years
+                    get_time(pull["updated_at"])).days) >= 1 * 365: # more than 1 years
                 continue
 
         if filter_larger_number:
