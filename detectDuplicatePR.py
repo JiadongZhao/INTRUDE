@@ -57,7 +57,6 @@ for repo in init.repos:
     candidatePRs = getCandidatePRs(repo)
 
     candidatePR_input_file = init.PR_candidate_List_filePath_prefix + repo.replace('/', '.') + '.txt'
-    detectionResult_output_file = init.PR_pairList_filePath_prefix + repo.replace('/', '.') + '.txt'
 
     with open(candidatePR_input_file) as f:
         for t in f.readlines():
