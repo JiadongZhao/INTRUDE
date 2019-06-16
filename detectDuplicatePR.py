@@ -16,10 +16,6 @@ detect.filter_same_author_and_already_mentioned = True
 detect.filter_version_number_diff = True
 
 
-cnt = 0
-add_flag = False
-
-
 def getCandidatePRs(repo):
     candidatePR_input_file = init.PR_candidate_List_filePath_prefix + repo.replace('/', '.') + '.txt'
     has = set()
@@ -56,20 +52,23 @@ def getCandidatePRs(repo):
     return prCandidate_list
 
 
-for repo in init.repos:
+def work():
+    cnt = 0
+    for repo in init.repos:
+        getCandidatePRs(repo)
+        candidatePR_input_file = init.PR_candidate_List_filePath_prefix + repo.replace('/', '.') + '.txt'
 
-    getCandidatePRs(repo)
+        with open(candidatePR_input_file) as f:
+            for t in f.readlines():
+                repo, pr_id = t.split()
+                cnt += 1
+                # if (cnt < 20):
+                #     continue
 
-    candidatePR_input_file = init.PR_candidate_List_filePath_prefix + repo.replace('/', '.') + '.txt'
+                dupPR_id, similarity = detect.detect_one(repo, pr_id)
 
-    with open(candidatePR_input_file) as f:
-        for t in f.readlines():
-            repo, pr_id  = t.split()
-            cnt += 1
-            # if (cnt < 20):
-            #     continue
+                with open(init.dupPR_result_filePath_prefix + repo.replace('/', '.') + '.txt', 'a') as outf:
+                    print(repo, pr_id, dupPR_id, similarity, sep='\t', file=outf)
 
-            dupPR_id, similarity = detect.detect_one(repo, pr_id)
-
-            with open(init.dupPR_result_filePath_prefix + repo.replace('/', '.') + '.txt', 'a') as outf:
-                print(repo, pr_id, dupPR_id, similarity, sep='\t', file=outf)
+if __name__ == "__main__":
+    work()
