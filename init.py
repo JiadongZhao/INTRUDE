@@ -19,7 +19,7 @@ else:
     dupPR_result_filePath_prefix = LOCAL_DATA_PATH + '/dupPR_'
 
 
-
+pr_date_difference_inDays= 365
 
 print('monitored_repoList_filePath:' + monitored_repoList_filePath)
 print('LOCAL_DATA_PATH:' + LOCAL_DATA_PATH)
