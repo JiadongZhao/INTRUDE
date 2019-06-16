@@ -49,12 +49,16 @@ def getCandidatePRs(repo):
 
         prCandidate_list.append((repo, str(current_pr_id)))
 
+    for pair in prCandidate_list:
+        with open(candidatePR_input_file, 'a') as f:  # opens file for appending
+            print("\t".join(pair), file=f)  # print pairs, separated by tabs, and followed by filename
+
     return prCandidate_list
 
 
 for repo in init.repos:
 
-    candidatePRs = getCandidatePRs(repo)
+    getCandidatePRs(repo)
 
     candidatePR_input_file = init.PR_candidate_List_filePath_prefix + repo.replace('/', '.') + '.txt'
 
