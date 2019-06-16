@@ -8,6 +8,7 @@ import datetime
 # takes: string, string, list of lists
 # returns: list of tuples
 def getConsecutivePRPairs(repo, current_pr, pull_list):
+
     current_pr_id = current_pr['number']
     current_pr_createdAt = current_pr['created_at']
 
