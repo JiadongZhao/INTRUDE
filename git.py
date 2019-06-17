@@ -207,7 +207,7 @@ def get_repo_info(repo, type, renew ):
     else:
         if type == 'branch':
             type = 'branche'
-        ret = api.request('GET', 'repos/%s/%ss' % (repo, type), True)
+        ret = api.request( 'repos/%s/%ss' % (repo, type), True)
 
     localfile.write_to_file(save_path, ret)
     return ret
@@ -254,7 +254,7 @@ def get_pull_commit(pull, renew=False):
             return localfile.get_file(save_path)
         except:
             pass
-    commits = api.request('GET', pull['commits_url'], True)
+    commits = api.request( pull['commits_url'], True)
     time.sleep(0.7)
     localfile.write_to_file(save_path, commits)
     return commits
@@ -270,7 +270,7 @@ def get_another_pull(pull, renew=False):
             pass
 
     comments_href = pull["_links"]["comments"]["href"]
-    comments = api.request('GET', comments_href, True)
+    comments = api.request(comments_href, True)
     time.sleep(0.7)
     candidates = []
     for comment in comments:
@@ -298,7 +298,7 @@ def fetch_file_list(pull, renew=False):
     if len(t) > 0:
         raise Exception('too big', pull['html_url'])
     else:
-        li = api.request('GET', 'repos/%s/pulls/%s/files' % (repo, num), True)
+        li = api.request( 'repos/%s/pulls/%s/files' % (repo, num), True)
         time.sleep(0.8)
         for f in li:
             if f.get('changes', 0) <= 5000 and ('filename' in f) and ('patch' in f):
@@ -437,7 +437,7 @@ if __name__ == "__main__":
     # print(r['changed_files'])
     # get_pull_commit(get_pull('ArduPilot/ardupilot', '8008'))
 
-    get_pull('jquery/jquery', '4379', True)
+    get_pull_commit('jquery/jquery', '4379', True)
     # print(len(get_repo_info('FancyCoder0/INFOX', 'pull', True)))
     # print(len(get_repo_info('FancyCoder0/INFOX', 'issue', True)))
     # print(len(get_repo_info('FancyCoder0/INFOX', 'commit', True)))
