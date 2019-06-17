@@ -153,7 +153,7 @@ def get_topK(repo, num1, topK=10, print_progress=False, use_way='new'):
             results[pull["number"]] = old_way(pullA, pull)
 
     result = [(x,y) for x, y in sorted(results.items(), key=lambda x: x[1], reverse=True)][:topK]    
-    return result
+    return result,feature_vector
 
 
 def run_list(repo, renew=False, run_num=200, rerun=False):
