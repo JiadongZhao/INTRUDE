@@ -90,6 +90,7 @@ def get_topK(repo, num1, topK=10, print_progress=False, use_way='new'):
     pull_v = {}
     
     for pull in pulls:
+        print("compare " +pullA['number'] + " " + pull['number'])
         cnt += 1
         
         if filter_out_too_big_pull_flag:

@@ -8,7 +8,7 @@ from datetime import datetime
 import fetch_raw_diff
 import init
 
-from flask import Flask
+# from flask import Flask
 from flask_github import GitHub
 
 import scraper
@@ -18,21 +18,15 @@ import logging
 
 logger = logging.getLogger('INTRUDE.scraper')
 
-app = Flask(__name__)
+# app = Flask(__name__)
 
-app.config['GITHUB_CLIENT_ID'] = os.environ.get('GITHUB_CLIENT_ID')
-app.config['GITHUB_CLIENT_SECRET'] = os.environ.get('GITHUB_CLIENT_SECRET')
-app.config['GITHUB_BASE_URL'] = 'https://api.github.com/'
-app.config['GITHUB_AUTH_URL'] = 'https://github.com/login/oauth/'
+# app.config['GITHUB_CLIENT_ID'] = os.environ.get('GITHUB_CLIENT_ID')
+# app.config['GITHUB_CLIENT_SECRET'] = os.environ.get('GITHUB_CLIENT_SECRET')
+# app.config['GITHUB_BASE_URL'] = 'https://api.github.com/'
+# app.config['GITHUB_AUTH_URL'] = 'https://github.com/login/oauth/'
 
 LOCAL_DATA_PATH = init.LOCAL_DATA_PATH
-# if (platform.system() == 'Linux'):
-#     LOCAL_DATA_PATH = '/DATA/luyao'
-# elif (platform.system() == 'Windows'):
-#     LOCAL_DATA_PATH = 'C:\\Users\\annik\\Documents\\REUSE\\INTRUDE\\PR_data' #backslashes are escape characters, so doubles are needed
-# else:
-#     LOCAL_DATA_PATH = '/Users/shuruiz/Work/researchProjects'
-print('LOCAL_DATA_PATH:' + LOCAL_DATA_PATH)
+
 
 # api = GitHub(app)
 api = scraper.GitHubAPI()
@@ -443,7 +437,7 @@ if __name__ == "__main__":
     # print(r['changed_files'])
     # get_pull_commit(get_pull('ArduPilot/ardupilot', '8008'))
 
-    get_pull('jquery/jquery', 'pull', '4379', True)
+    get_pull('jquery/jquery', '4379', True)
     # print(len(get_repo_info('FancyCoder0/INFOX', 'pull', True)))
     # print(len(get_repo_info('FancyCoder0/INFOX', 'issue', True)))
     # print(len(get_repo_info('FancyCoder0/INFOX', 'commit', True)))
