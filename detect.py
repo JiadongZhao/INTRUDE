@@ -73,7 +73,7 @@ def get_topK(repo, num1, topK=10, print_progress=False, use_way='new'):
         last_detect_repo = repo
         init_model_with_repo(repo)
 
-    pulls = get_repo_info(repo, 'pull')
+    pulls = get_repo_info(repo, 'pull',renew=False)
     pullA = get_pull(repo, num1)
     
     if filter_already_cite:

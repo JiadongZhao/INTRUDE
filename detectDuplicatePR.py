@@ -34,7 +34,7 @@ def getCandidatePRs(repo):
                 has.add((r, n))
 
     # get all pr
-    pull_list = get_repo_info(repo, 'pull')  # get all info about all PRs, sort by ID
+    pull_list = get_repo_info(repo, 'pull',renew=True)  # get all info about all PRs, sort by ID
     pull_list = sorted(pull_list, key=lambda x: int(x['number']), reverse=True)
     print("length : " + str(len(pull_list)))
 
@@ -45,7 +45,7 @@ def getCandidatePRs(repo):
         # get date for today, if the pr was created 1 yr ago, then stop
         now = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
         if (current_pr['state'] == 'closed'):
-#             print("closed pr " + str(current_pr_id))
+            #             print("closed pr " + str(current_pr_id))
             continue
 
         if (util.timeUtil.days_between(now, current_pr_createdAt) > init.pr_date_difference_inDays):
@@ -70,23 +70,20 @@ def work():
         print("get open PRs from repo: " + repo)
         getCandidatePRs(repo)
         candidatePR_input_file = init.PR_candidate_List_filePath_prefix + repo.replace('/', '.') + '.txt'
-        
-        
+
         try:
             with open(candidatePR_input_file) as f:
                 for t in f.readlines():
                     repo, pr_id = t.split()
                     cnt += 1
-                    dupPR_id, similarity,feature_vector = detect.detect_one(repo, pr_id)
+                    dupPR_id, similarity, feature_vector = detect.detect_one(repo, pr_id)
                     with open(init.dupPR_result_filePath_prefix + repo.replace('/', '.') + '.txt', 'a') as outf:
-                # print(repo, pr_id, dupPR_id, similarity, sep='\t', file=outf)
-                        print("\t".join([repo, str(pr_id), str(dupPR_id)] + ["%.15f" % similarity] + ["%.2f" % x for x in feature_vector]), file=outf)
+                        print("\t".join(
+                            [repo, str(pr_id), str(dupPR_id)] + ["%.15f" % similarity] + ["%.2f" % x for x in
+                                                                                          feature_vector]), file=outf)
         except FileNotFoundError:
             print("file not exist, continue")
             continue
-
-
- 
 
 
 if __name__ == "__main__":
