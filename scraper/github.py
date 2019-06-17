@@ -175,7 +175,6 @@ class GitHubAPI(object):
 
         while True:
             for token in self.tokens:
-                print(token.token)
                 # for token in sorted(self.tokens, key=lambda t: t.when(url)):
                 if not token.ready(url):
                     continue
