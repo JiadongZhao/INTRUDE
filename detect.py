@@ -101,7 +101,6 @@ def get_topK(repo, num1, topK=10, print_progress=False, use_way='new'):
 #             time_diff = abs((get_time(pullA["updated_at"]) - get_time(pull["updated_at"])).days)
 #  updated_at is not reliable, see example: https://github.com/jquery/jquery/pull/1002
             time_diff = abs((get_time(pullA["created_at"]) - get_time(pull["created_at"])).days)
-            print (str(time_diff) + "days difference")
             if  time_diff >= 2 * 365: # more than 2 years
                 continue
 
@@ -162,7 +161,6 @@ def get_topK(repo, num1, topK=10, print_progress=False, use_way='new'):
             results[pull["number"]] = old_way(pullA, pull)
 
     result = [(x,y) for x, y in sorted(results.items(), key=lambda x: x[1], reverse=True)][:topK] 
-    print(str(result[0][0]) + " "+ str(result[0][1]))
     return result,feature_vector
 
 

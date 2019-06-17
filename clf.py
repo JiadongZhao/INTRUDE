@@ -110,7 +110,7 @@ def init_model_with_repo(repo, save_id=None):
         init_model_with_pulls([], save_id)
     except:
         # init_model_with_pulls(shuffle(get_repo_info(repo, 'pull'))[:10000], save_id)
-        init_model_with_pulls(get_repo_info(repo, 'pull'), save_id)
+        init_model_with_pulls(get_repo_info(repo, 'pull', renew = False), save_id)
 
 
 # Calculate feature vector.
