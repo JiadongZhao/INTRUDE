@@ -3,6 +3,7 @@ import os
 import re
 import requests
 import platform
+from datetime import datetime
 
 import fetch_raw_diff
 import init
@@ -10,7 +11,12 @@ import init
 from flask import Flask
 from flask_github import GitHub
 
+import scraper
 from util import localfile
+from random import randint
+import logging
+
+logger = logging.getLogger('INTRUDE.scraper')
 
 app = Flask(__name__)
 
@@ -18,7 +24,6 @@ app.config['GITHUB_CLIENT_ID'] = os.environ.get('GITHUB_CLIENT_ID')
 app.config['GITHUB_CLIENT_SECRET'] = os.environ.get('GITHUB_CLIENT_SECRET')
 app.config['GITHUB_BASE_URL'] = 'https://api.github.com/'
 app.config['GITHUB_AUTH_URL'] = 'https://github.com/login/oauth/'
-
 
 LOCAL_DATA_PATH = init.LOCAL_DATA_PATH
 # if (platform.system() == 'Linux'):
@@ -29,14 +34,15 @@ LOCAL_DATA_PATH = init.LOCAL_DATA_PATH
 #     LOCAL_DATA_PATH = '/Users/shuruiz/Work/researchProjects'
 print('LOCAL_DATA_PATH:' + LOCAL_DATA_PATH)
 
-api = GitHub(app)
+# api = GitHub(app)
+api = scraper.GitHubAPI()
 
 
-@api.access_token_getter
+# @api.access_token_getter
 def token_getter():
     with open('./data/token.txt', 'r') as file:
         access_token = [line.rstrip('\n') for line in file]
-        return access_token[0]
+        return access_token
 
 
 def text2list_precheck(func):
@@ -203,8 +209,7 @@ def get_repo_info(repo, type, renew=True):
 
     print('start fetch new list for ', repo, type)
     if (type == 'pull') or (type == 'issue'):
-        ret = api.request('GET', 'repos/%s/%ss?state=closed' % (repo, type), True)
-        ret.extend(api.request('GET', 'repos/%s/%ss?state=open' % (repo, type), True))
+        ret = api.request('repos/%s/%ss' % (repo, type), state='all')
     else:
         if type == 'branch':
             type = 'branche'
@@ -263,7 +268,7 @@ def get_pull_commit(pull, renew=False):
 
 def get_another_pull(pull, renew=False):
     save_path = LOCAL_DATA_PATH + '/pr_data/%s/%s/another_pull.json' % (
-    pull["base"]["repo"]["full_name"], pull["number"])
+        pull["base"]["repo"]["full_name"], pull["number"])
     if os.path.exists(save_path) and (not renew):
         try:
             return localfile.get_file(save_path)
@@ -346,6 +351,91 @@ def run_and_save(repo, skip_big=False):
         fetch_file_list(repo, pull)
 
         print('finish on', repo, num)
+
+
+# ------------------copy from ghd project ---------------------------------------------------
+class TokenNotReady(requests.HTTPError):
+    pass
+
+
+def request(self, url, method='get', paginate=False, data=None, **params):
+    # type: (str, str, bool, str) -> dict
+    """ Generic, API version agnostic request method """
+    timeout_counter = 0
+    if paginate:
+        paginated_res = []
+        params['page'] = 1
+        params['per_page'] = 100
+
+    while True:
+        for token in self.tokens:
+            # for token in sorted(self.tokens, key=lambda t: t.when(url)):
+            if not token.ready(url):
+                continue
+
+            try:
+                r = token.request(url, method=method, data=data, **params)
+            except requests.ConnectionError:
+                print('except requests.ConnectionError')
+                continue
+            except TokenNotReady:
+                continue
+            except requests.exceptions.Timeout:
+                timeout_counter += 1
+                if timeout_counter > len(self.tokens):
+                    raise
+                continue  # i.e. try again
+
+            if r.status_code in (404, 451):
+                print("404, 451 retry..")
+                return {}
+                # API v3 only
+                # raise RepoDoesNotExist(
+                #     "GH API returned status %s" % r.status_code)
+            elif r.status_code == 409:
+                print("409 retry..")
+                # repository is empty https://developer.github.com/v3/git/
+                return {}
+            elif r.status_code == 410:
+                print("410 retry..")
+                # repository is empty https://developer.github.com/v3/git/
+                return {}
+            elif r.status_code == 403:
+                # repository is empty https://developer.github.com/v3/git/
+                print("403 retry..")
+                time.sleep(randint(1, 29))
+                continue
+            elif r.status_code == 443:
+                # repository is empty https://developer.github.com/v3/git/
+                print("443 retry..")
+                time.sleep(randint(1, 29))
+                continue
+            elif r.status_code == 502:
+                # repository is empty https://developer.github.com/v3/git/
+                print("443 retry..")
+                time.sleep(randint(1, 29))
+                continue
+            r.raise_for_status()
+            res = r.json()
+            if paginate:
+                paginated_res.extend(res)
+                has_next = 'rel="next"' in r.headers.get("Link", "")
+                if not res or not has_next:
+                    return paginated_res
+                else:
+                    params["page"] += 1
+                    continue
+            else:
+                return res
+
+        next_res = min(token.when(url) for token in self.tokens)
+        sleep = int(next_res - time.time()) + 1
+        if sleep > 0:
+            logger.info(
+                "%s: out of keys, resuming in %d minutes, %d seconds",
+                datetime.now().strftime("%H:%M"), *divmod(sleep, 60))
+            time.sleep(sleep)
+            logger.info(".. resumed")
 
 
 if __name__ == "__main__":
