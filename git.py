@@ -254,7 +254,7 @@ def get_pull_commit(pull, renew=False):
             return localfile.get_file(save_path)
         except:
             pass
-    commits = api.request( pull['commits_url'], True)
+    commits = api.request( pull['commits_url'].replace('https://api.github.com/', ''), True)
     time.sleep(0.7)
     localfile.write_to_file(save_path, commits)
     return commits
