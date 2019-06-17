@@ -247,7 +247,7 @@ def get_pull(repo, num, renew=False):
         except:
             pass
 
-    r = api.get('repos/%s/pulls/%s' % (repo, num))
+    r = api.request('repos/%s/pulls/%s' % (repo, num))
     time.sleep(3.0)
     localfile.write_to_file(save_path, r)
     return r

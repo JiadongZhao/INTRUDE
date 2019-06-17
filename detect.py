@@ -152,7 +152,8 @@ def get_topK(repo, num1, topK=10, print_progress=False, use_way='new'):
         elif use_way == 'old':
             results[pull["number"]] = old_way(pullA, pull)
 
-    result = [(x,y) for x, y in sorted(results.items(), key=lambda x: x[1], reverse=True)][:topK]    
+    result = [(x,y) for x, y in sorted(results.items(), key=lambda x: x[1], reverse=True)][:topK] 
+    
     return result,feature_vector
 
 
@@ -196,7 +197,7 @@ def run_list(repo, renew=False, run_num=200, rerun=False):
 
 
 def detect_one(repo, num):
-    print('detect on', repo, num)
+    print('analyzing ', repo, num)
     speed_up = True
     filter_create_after_merge = True
 
@@ -204,6 +205,7 @@ def detect_one(repo, num):
     if len(ret) < 1:
         return -1, -1
     else:
+        print(repo+ " " + num1 + " " + ret[0][0]+ " " + ret[0][1])
         return ret[0][0], ret[0][1], feature_vector
         # return ret[0][0], ret[0][1]
 

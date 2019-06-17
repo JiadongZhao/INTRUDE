@@ -24,8 +24,8 @@ else:
 
 pr_date_difference_inDays= 365
 
-print('monitored_repoList_filePath:' + monitored_repoList_filePath)
-print('LOCAL_DATA_PATH:' + LOCAL_DATA_PATH)
-print('PR_candidate_List_filePath_prefix:' + PR_candidate_List_filePath_prefix)
+# print('monitored_repoList_filePath:' + monitored_repoList_filePath)
+# print('LOCAL_DATA_PATH:' + LOCAL_DATA_PATH)
+# print('PR_candidate_List_filePath_prefix:' + PR_candidate_List_filePath_prefix)
 
 

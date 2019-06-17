@@ -3,18 +3,18 @@ from git import *
 import init
 import util.timeUtil
 import datetime
-#
-# import detect
-#
-# detect.speed_up = True
-# detect.filter_larger_number = True
-# detect.filter_out_too_old_pull_flag = True
-# detect.filter_already_cite = False
-# detect.filter_create_after_merge = True
-# detect.filter_overlap_author = False
-# detect.filter_out_too_big_pull_flag = False
-# detect.filter_same_author_and_already_mentioned = True
-# detect.filter_version_number_diff = True
+
+import detect
+
+detect.speed_up = True
+detect.filter_larger_number = True
+detect.filter_out_too_old_pull_flag = True
+detect.filter_already_cite = False
+detect.filter_create_after_merge = True
+detect.filter_overlap_author = False
+detect.filter_out_too_big_pull_flag = False
+detect.filter_same_author_and_already_mentioned = True
+detect.filter_version_number_diff = True
 
 add_flag = True
 
@@ -45,11 +45,11 @@ def getCandidatePRs(repo):
         # get date for today, if the pr was created 1 yr ago, then stop
         now = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
         if (current_pr['state'] == 'closed'):
-            print("closed pr" + str(current_pr_id))
+#             print("closed pr " + str(current_pr_id))
             continue
 
         if (util.timeUtil.days_between(now, current_pr_createdAt) > init.pr_date_difference_inDays):
-            print("older than a year" + str(current_pr_id))
+            print("older than a year " + str(current_pr_id) + "stop")
             break
         print('current pr :' + str(
             current_pr_id) + " created_at: " + current_pr_createdAt + " in repo:" + repo)  # set PR as the one to compare with consecutives (below)
@@ -80,12 +80,12 @@ def work():
             print("file not exist, continue")
             continue
 
-        # dupPR_id, similarity,feature_vector = detect.detect_one(repo, pr_id)
-        #
-        # with open(init.dupPR_result_filePath_prefix + repo.replace('/', '.') + '.txt', 'a') as outf:
-        #         # print(repo, pr_id, dupPR_id, similarity, sep='\t', file=outf)
-        #         print("\t".join([repo, str(pr_id), str(dupPR_id)] + ["%.15f" % similarity] + ["%.2f" % x for x in feature_vector]), file=outf)
-        #
+        dupPR_id, similarity,feature_vector = detect.detect_one(repo, pr_id)
+        
+        with open(init.dupPR_result_filePath_prefix + repo.replace('/', '.') + '.txt', 'a') as outf:
+                # print(repo, pr_id, dupPR_id, similarity, sep='\t', file=outf)
+                print("\t".join([repo, str(pr_id), str(dupPR_id)] + ["%.15f" % similarity] + ["%.2f" % x for x in feature_vector]), file=outf)
+        
 
 
 if __name__ == "__main__":
