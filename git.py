@@ -190,7 +190,7 @@ def fetch_pr_info(pull, must_in_local=False):
 
 # -------------------About Repo--------------------------------------------------------
 
-def get_repo_info(repo, type, renew=False):
+def get_repo_info(repo, type, renew=True):
     save_path = LOCAL_DATA_PATH + '/pr_data/' + repo + '/%s_list.json' % type
     if type == 'fork':
         save_path = LOCAL_DATA_PATH + '/result/' + repo + '/forks_list.json'
