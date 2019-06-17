@@ -205,7 +205,6 @@ def detect_one(repo, num):
     if len(ret) < 1:
         return -1, -1
     else:
-        print(repo+ " " + num1 + " " + ret[0][0]+ " " + ret[0][1])
         return ret[0][0], ret[0][1], feature_vector
         # return ret[0][0], ret[0][1]
 
@@ -214,7 +213,7 @@ if __name__ == "__main__":
     if len(sys.argv) == 3:
         r = sys.argv[1].strip()
         n = sys.argv[2].strip()
-        print(detect_one(r, n))
+        detect_one(r, n)
     
     # detection on history (random sampling)
     if len(sys.argv) == 2:
