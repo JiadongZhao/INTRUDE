@@ -58,9 +58,10 @@ class GitHubAPIToken(object):
             self.token = token
             self._headers = {
                 "Authorization": "token " + token,
-                "Accept": "application/vnd.github.v3+json"
+                "Accept": "application/vnd.github.v3+json",
                 # "Accept": "application/vnd.github.mockingbird-preview"
-            }
+#                 "User-Agent": "request"
+           }
         self.limit = {}
         for api_class in ('core', 'search'):
             self.limit[api_class] = {
@@ -213,7 +214,7 @@ class GitHubAPI(object):
                 elif r.status_code == 403:
                     # repository is empty https://developer.github.com/v3/git/
                     print("403 retry..")
-                    time.sleep(randint(1, 29))
+                    time.sleep(randint(1, 60))
                     continue
                 elif r.status_code == 443:
                     # repository is empty https://developer.github.com/v3/git/

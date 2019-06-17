@@ -94,6 +94,7 @@ check_large_cache = {}
 
 
 def check_large(pull):
+    print ("check_large:" + str(pull['number']))
     global check_large_cache
     index = (pull["base"]["repo"]["full_name"], pull["number"])
     if index in check_large_cache:
@@ -142,6 +143,7 @@ file_list_cache = {}
 
 
 def fetch_pr_info(pull, must_in_local=False):
+    print ("fetch_pr_info:" + str(pull['number']))
     global file_list_cache
     ind = (pull["base"]["repo"]["full_name"], pull["number"])
     if ind in file_list_cache:
@@ -254,7 +256,9 @@ def get_pull_commit(pull, renew=False):
             return localfile.get_file(save_path)
         except:
             pass
-    commits = api.request( pull['commits_url'].replace('https://api.github.com/', ''), True)
+#     commits = api.request(pull['commits_url'].replace('https://api.github.com/', ''), True)
+    
+    commits= api.request(pull['commits_url'].replace('https://api.github.com/', paginate=True, state='all'))
     time.sleep(0.7)
     localfile.write_to_file(save_path, commits)
     return commits
@@ -436,8 +440,11 @@ if __name__ == "__main__":
     # r = get_pull('angular/angular.js', '16629', 1)
     # print(r['changed_files'])
     # get_pull_commit(get_pull('ArduPilot/ardupilot', '8008'))
-
-    get_pull_commit('jquery/jquery', '4379', True)
+    api.request("repos/jquery/jquery/pulls/4406/commits")
+    api.request("repos/jquery/jquery/pulls/4406/commits")
+    api.request("repos/jquery/jquery/pulls/4406/commits")
+    api.request("repos/jquery/jquery/pulls/4406/commits")
+#     get_pull_commit('jquery/jquery', '4379', True)
     # print(len(get_repo_info('FancyCoder0/INFOX', 'pull', True)))
     # print(len(get_repo_info('FancyCoder0/INFOX', 'issue', True)))
     # print(len(get_repo_info('FancyCoder0/INFOX', 'commit', True)))

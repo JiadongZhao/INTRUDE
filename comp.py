@@ -355,6 +355,7 @@ def calc_sim(A, B):
             return total_message
         
         try:
+            print("get commits ")
             commit_sim = get_text_sim(concat_commits(get_pull_commit(A)), concat_commits(get_pull_commit(B)))
         except:
             commit_sim = [0.0]
