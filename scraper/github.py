@@ -11,7 +11,7 @@ try:
 except ImportError:
     settings = object()
 
-# _tokens = getattr(settings, "SCRAPER_GITHUB_API_TOKENS", [])
+_tokens = getattr(settings, "SCRAPER_GITHUB_API_TOKENS", [])
 
 with open('./data/token.txt', 'r') as file:
     _tokens = [line.rstrip('\n') for line in file]
@@ -175,12 +175,14 @@ class GitHubAPI(object):
 
         while True:
             for token in self.tokens:
+                print(token.token)
                 # for token in sorted(self.tokens, key=lambda t: t.when(url)):
                 if not token.ready(url):
                     continue
 
                 try:
                     r = token.request(url, method=method, data=data, **params)
+                    print(r.url)
                 except requests.ConnectionError:
                     print('except requests.ConnectionError')
                     continue
@@ -206,6 +208,9 @@ class GitHubAPI(object):
                     print("410 retry..")
                     # repository is empty https://developer.github.com/v3/git/
                     return {}
+                elif r.status_code == 401:
+                    print("401,Bad credentials, please remove this token")
+                    continue
                 elif r.status_code == 403:
                     # repository is empty https://developer.github.com/v3/git/
                     print("403 retry..")

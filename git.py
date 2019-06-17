@@ -209,7 +209,7 @@ def get_repo_info(repo, type, renew=True):
 
     print('start fetch new list for ', repo, type)
     if (type == 'pull') or (type == 'issue'):
-        ret = api.request('repos/%s/%ss' % (repo, type), state='all')
+        ret = api.request('repos/%s/%ss' % (repo, type), state='all', paginate= True)
     else:
         if type == 'branch':
             type = 'branche'
@@ -247,7 +247,7 @@ def get_pull(repo, num, renew=False):
         except:
             pass
 
-    r = api.get('repos/%s/pulls/%s' % (repo, num))
+    r = api.request('repos/%s/pulls/%s' % (repo, num))
     time.sleep(3.0)
     localfile.write_to_file(save_path, r)
     return r
@@ -443,12 +443,12 @@ if __name__ == "__main__":
     # print(r['changed_files'])
     # get_pull_commit(get_pull('ArduPilot/ardupilot', '8008'))
 
-    print(len(get_repo_info('FancyCoder0/INFOX', 'fork', True)))
-    print(len(get_repo_info('FancyCoder0/INFOX', 'pull', True)))
-    print(len(get_repo_info('FancyCoder0/INFOX', 'issue', True)))
-    print(len(get_repo_info('FancyCoder0/INFOX', 'commit', True)))
-    print(len(get_repo_info('tensorflow/tensorflow', 'branch', True)))
-
-    print(len(fetch_file_list(get_pull('FancyCoder0/INFOX', '113', True))))
-    print(get_another_pull(get_pull('facebook/react', '12503'), True))
-    print([x['commit']['message'] for x in get_pull_commit(get_pull('facebook/react', '12503'), True)])
+    get_pull('jquery/jquery', 'pull', '4379', True)
+    # print(len(get_repo_info('FancyCoder0/INFOX', 'pull', True)))
+    # print(len(get_repo_info('FancyCoder0/INFOX', 'issue', True)))
+    # print(len(get_repo_info('FancyCoder0/INFOX', 'commit', True)))
+    # print(len(get_repo_info('tensorflow/tensorflow', 'branch', True)))
+    #
+    # print(len(fetch_file_list(get_pull('FancyCoder0/INFOX', '113', True))))
+    # print(get_another_pull(get_pull('facebook/react', '12503'), True))
+    # print([x['commit']['message'] for x in get_pull_commit(get_pull('facebook/react', '12503'), True)])

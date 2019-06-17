@@ -3,18 +3,18 @@ from git import *
 import init
 import util.timeUtil
 import datetime
-#
-# import detect
-#
-# detect.speed_up = True
-# detect.filter_larger_number = True
-# detect.filter_out_too_old_pull_flag = True
-# detect.filter_already_cite = False
-# detect.filter_create_after_merge = True
-# detect.filter_overlap_author = False
-# detect.filter_out_too_big_pull_flag = False
-# detect.filter_same_author_and_already_mentioned = True
-# detect.filter_version_number_diff = True
+
+import detect
+
+detect.speed_up = True
+detect.filter_larger_number = True
+detect.filter_out_too_old_pull_flag = True
+detect.filter_already_cite = False
+detect.filter_create_after_merge = True
+detect.filter_overlap_author = False
+detect.filter_out_too_big_pull_flag = False
+detect.filter_same_author_and_already_mentioned = True
+detect.filter_version_number_diff = True
 
 add_flag = True
 
@@ -80,12 +80,12 @@ def work():
             print("file not exist, continue")
             continue
 
-        # dupPR_id, similarity,feature_vector = detect.detect_one(repo, pr_id)
-        #
-        # with open(init.dupPR_result_filePath_prefix + repo.replace('/', '.') + '.txt', 'a') as outf:
-        #         # print(repo, pr_id, dupPR_id, similarity, sep='\t', file=outf)
-        #         print("\t".join([repo, str(pr_id), str(dupPR_id)] + ["%.15f" % similarity] + ["%.2f" % x for x in feature_vector]), file=outf)
-        #
+        dupPR_id, similarity,feature_vector = detect.detect_one(repo, pr_id)
+
+        with open(init.dupPR_result_filePath_prefix + repo.replace('/', '.') + '.txt', 'a') as outf:
+                # print(repo, pr_id, dupPR_id, similarity, sep='\t', file=outf)
+                print("\t".join([repo, str(pr_id), str(dupPR_id)] + ["%.15f" % similarity] + ["%.2f" % x for x in feature_vector]), file=outf)
+
 
 
 if __name__ == "__main__":
