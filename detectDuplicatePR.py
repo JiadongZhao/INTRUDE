@@ -67,23 +67,26 @@ def getCandidatePRs(repo):
 def work():
     cnt = 0
     for repo in init.repos:
-        print(repo)
+        print("get open PRs from repo: " + repo)
         getCandidatePRs(repo)
         candidatePR_input_file = init.PR_candidate_List_filePath_prefix + repo.replace('/', '.') + '.txt'
-
+        
+        
         try:
             with open(candidatePR_input_file) as f:
                 for t in f.readlines():
                     repo, pr_id = t.split()
                     cnt += 1
+                    dupPR_id, similarity,feature_vector = detect.detect_one(repo, pr_id)
+                    with open(init.dupPR_result_filePath_prefix + repo.replace('/', '.') + '.txt', 'a') as outf:
+                # print(repo, pr_id, dupPR_id, similarity, sep='\t', file=outf)
+                        print("\t".join([repo, str(pr_id), str(dupPR_id)] + ["%.15f" % similarity] + ["%.2f" % x for x in feature_vector]), file=outf)
         except FileNotFoundError:
             print("file not exist, continue")
             continue
-
-        dupPR_id, similarity,feature_vector = detect.detect_one(repo, pr_id)
-        with open(init.dupPR_result_filePath_prefix + repo.replace('/', '.') + '.txt', 'a') as outf:
-                # print(repo, pr_id, dupPR_id, similarity, sep='\t', file=outf)
-                print("\t".join([repo, str(pr_id), str(dupPR_id)] + ["%.15f" % similarity] + ["%.2f" % x for x in feature_vector]), file=outf)
+        
+        
+        
  
 
 
