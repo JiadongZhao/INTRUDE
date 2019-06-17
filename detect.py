@@ -200,11 +200,12 @@ def detect_one(repo, num):
     speed_up = True
     filter_create_after_merge = True
 
-    ret = get_topK(repo, num , 1, True)
+    ret, feature_vector = get_topK(repo, num , 1, True)
     if len(ret) < 1:
         return -1, -1
     else:
-        return ret[0][0], ret[0][1]
+        return ret[0][0], ret[0][1], feature_vector
+        # return ret[0][0], ret[0][1]
 
 if __name__ == "__main__":
     # detect one PR
