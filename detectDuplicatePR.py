@@ -80,11 +80,19 @@ def work():
             print("file not exist, continue")
             continue
 
+<<<<<<< HEAD
         # dupPR_id, similarity,feature_vector = detect.detect_one(repo, pr_id)
         #
         # with open(init.dupPR_result_filePath_prefix + repo.replace('/', '.') + '.txt', 'a') as outf:
         #         # print(repo, pr_id, dupPR_id, similarity, sep='\t', file=outf)
         #         print("\t".join([repo, pr_id, dupPR_id] + ["%.15f" % similarity] + ["%.2f" % x for x in feature_vector]), file=outf)
+=======
+        dupPR_id, similarity,feature_vector = detect.detect_one(repo, pr_id)
+
+        with open(init.dupPR_result_filePath_prefix + repo.replace('/', '.') + '.txt', 'a') as outf:
+                # print(repo, pr_id, dupPR_id, similarity, sep='\t', file=outf)
+                print("\t".join([repo, str(pr_id), str(dupPR_id)] + ["%.15f" % similarity] + ["%.2f" % x for x in feature_vector]), file=outf)
+>>>>>>> 340eeb209f6edd9be481402c0f7bc26859f059c6
 
 
 if __name__ == "__main__":

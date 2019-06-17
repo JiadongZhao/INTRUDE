@@ -13,7 +13,7 @@ else:
         LOCAL_DATA_PATH = '/DATA/luyao'
     else:
         LOCAL_DATA_PATH = '/Users/shuruiz/Work/researchProjects'
-    # monitored_repoList_filePath = 'data/2000forks-repoList.csv'
+     # monitored_repoList_filePath = 'data/2000forks-repoList.csv'
     monitored_repoList_filePath = 'data/test_repo_list.txt'
     PR_pairList_filePath_prefix = 'data/consecutive_PR_pairs_'
     PR_candidate_List_filePath_prefix = 'data/candidate_PR_'
@@ -22,7 +22,7 @@ else:
     dupPR_result_filePath_prefix = LOCAL_DATA_PATH + '/dupPR/repo_'
 
 
-pr_date_difference_inDays= 2*365
+pr_date_difference_inDays= 365
 
 print('monitored_repoList_filePath:' + monitored_repoList_filePath)
 print('LOCAL_DATA_PATH:' + LOCAL_DATA_PATH)
