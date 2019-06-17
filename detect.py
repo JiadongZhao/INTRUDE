@@ -98,6 +98,7 @@ def get_topK(repo, num1, topK=10, print_progress=False, use_way='new'):
                 continue
 
         if filter_out_too_old_pull_flag:
+            print("check update at data")
             if abs((get_time(pullA["updated_at"]) - \
                     get_time(pull["updated_at"])).days) >= 1 * 365: # more than 1 years
                 continue
@@ -112,11 +113,13 @@ def get_topK(repo, num1, topK=10, print_progress=False, use_way='new'):
                 continue
 
             # case of following up work (not sure)
+            print("check if it is follow up work")
             if str(pull["number"]) in (get_pr_and_issue_numbers(pullA["title"]) + \
                                        get_pr_and_issue_numbers(pullA["body"])):
                 continue
 
         if filter_already_cite:
+            print("check reference")
             # "cite" cases
             if (str(pull["number"]) in cite.get(str(pullA["number"]), [])) or\
             (str(pullA["number"]) in cite.get(str(pull["number"]), [])):
@@ -124,22 +127,26 @@ def get_topK(repo, num1, topK=10, print_progress=False, use_way='new'):
 
         if filter_create_after_merge:
             # create after another is merged
+            print("check filter_create_after_merge")
             if (pull["merged_at"] is not None) and \
             (get_time(pull["merged_at"]) < get_time(pullA["created_at"])) and \
             ((get_time(pullA["created_at"]) - get_time(pull["merged_at"])).days >= 14):
                 continue
 
         if speed_up:
+            print("speed up")
             if not speed_up_check(pullA, pull):
                 continue
         
         if filter_overlap_author:
+            print("filter_overlap_author")
             if check_pro_pick(pullA, pull):
                 continue
             if have_commit_overlap(pullA, pull):
                 continue
         
         if filter_version_number_diff:
+            print("filter_version_number_diff")
             if check_version_numbers(pullA, pull):
                 continue
             
@@ -149,12 +156,15 @@ def get_topK(repo, num1, topK=10, print_progress=False, use_way='new'):
                 sys.stdout.flush()
         
         if use_way == 'new':
+            print("new way")
             feature_vector = get_pr_sim_vector(pullA, pull)        
             results[pull["number"]] = c.predict_proba([feature_vector])[0][1]
         elif 'leave' in use_way:
+            print("leave way")
             feature_vector = leave_feat(pullA, pull, use_way)
             results[pull["number"]] = c.predict_proba([feature_vector])[0][1]
         elif use_way == 'old':
+            print("old way")
             results[pull["number"]] = old_way(pullA, pull)
 
     result = [(x,y) for x, y in sorted(results.items(), key=lambda x: x[1], reverse=True)][:topK] 
