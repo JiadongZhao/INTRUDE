@@ -69,6 +69,7 @@ def have_commit_overlap(p1, p2):
 # returns similarity score and feature vector
 def get_topK(repo, num1, topK=10, print_progress=False, use_way='new'):
     global last_detect_repo
+    global feature_vector
     if last_detect_repo != repo:
         last_detect_repo = repo
         init_model_with_repo(repo)
