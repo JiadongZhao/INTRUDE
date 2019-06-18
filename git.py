@@ -192,7 +192,8 @@ def fetch_pr_info(pull, must_in_local=False):
 
 # -------------------About Repo--------------------------------------------------------
 
-def get_repo_info(repo, type, renew ):
+
+def get_repo_info(repo, type, renew):
     save_path = LOCAL_DATA_PATH + '/pr_data/' + repo + '/%s_list.json' % type
     if type == 'fork':
         save_path = LOCAL_DATA_PATH + '/result/' + repo + '/forks_list.json'
@@ -263,6 +264,18 @@ def get_pull_commit(pull, renew=False):
     localfile.write_to_file(save_path, commits)
     return commits
 
+#
+# # get event info
+# # params: repo (str 'owner/repo'url), issue id (int --> an issue or a PR id)
+# def issue_pr_timeline(self, repo, issue_id, renew):
+#     save_path = LOCAL_DATA_PATH + '/pr_events/' + repo + '/%s.json' % issue_id
+#     if (os.path.exists(save_path)) and (not renew):
+#         try:
+#             return localfile.get_file(save_path)
+#         except:
+#             pass
+#     c = api.get(repo)
+#
 
 def get_another_pull(pull, renew=False):
     save_path = LOCAL_DATA_PATH + '/pr_data/%s/%s/another_pull.json' % (

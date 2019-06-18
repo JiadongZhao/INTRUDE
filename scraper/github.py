@@ -165,6 +165,7 @@ class GitHubAPI(object):
                 "No GitHub API tokens found in settings.py. Please add some.")
         self.tokens = [GitHubAPIToken(t, timeout=timeout) for t in tokens]
 
+    # login & token usage
     def request(self, url, method='get', paginate=False, data=None, **params):
         # type: (str, str, bool, str) -> dict
         """ Generic, API version agnostic request method """
