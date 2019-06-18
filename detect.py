@@ -66,7 +66,7 @@ def have_commit_overlap(p1, p2):
             return True
     return False
 
-    
+# returns similarity score and feature vector
 def get_topK(repo, num1, topK=10, print_progress=False, use_way='new'):
     global last_detect_repo
     if last_detect_repo != repo:
@@ -79,7 +79,7 @@ def get_topK(repo, num1, topK=10, print_progress=False, use_way='new'):
 
     print("get pr "+ str(num1))
     pullA = get_pull(repo, num1)
-    
+
     if filter_already_cite:
         cite[str(pullA["number"])] = get_another_pull(pullA)
 
@@ -88,11 +88,13 @@ def get_topK(repo, num1, topK=10, print_progress=False, use_way='new'):
     cnt = 0
     
     pull_v = {}
-    
+
+    #check if any flags are active & violated
     for pull in pulls:
         print("compare " + str(pullA['number']) + " " + str(pull['number']))
         cnt += 1
-        
+
+        # too many changed files check
         if filter_out_too_big_pull_flag:
             if check_large(pull):
                 continue
@@ -119,6 +121,9 @@ def get_topK(repo, num1, topK=10, print_progress=False, use_way='new'):
                                        get_pr_and_issue_numbers(pullA["body"])):
                 continue
 
+        # load events of both PRs, check if one referenced the other
+        # EX: https://github.com/akinnae/curly-train/pull/1
+        # cross-reference check
         if filter_already_cite:
             # "cite" cases
             if (str(pull["number"]) in cite.get(str(pullA["number"]), [])) or\
@@ -161,7 +166,7 @@ def get_topK(repo, num1, topK=10, print_progress=False, use_way='new'):
             results[pull["number"]] = old_way(pullA, pull)
 
     result = [(x,y) for x, y in sorted(results.items(), key=lambda x: x[1], reverse=True)][:topK] 
-    return result,feature_vector
+    return result, feature_vector
 
 
 def run_list(repo, renew=False, run_num=200, rerun=False):

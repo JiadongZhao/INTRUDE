@@ -273,7 +273,7 @@ def get_another_pull(pull, renew=False):
         except:
             pass
 
-    comments_href = pull["_links"]["comments"]["href"]
+    comments_href = pull["_links"]["comments"]["href"]  #found cites in comments, but checking events is easier.
     comments = api.request(comments_href, True)
     time.sleep(0.7)
     candidates = []

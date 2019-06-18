@@ -18,7 +18,9 @@ detect.filter_version_number_diff = True
 
 add_flag = True
 
-
+#
+# get open PRs to compare this repo to
+#
 def getCandidatePRs(repo):
     candidatePR_input_file = init.PR_candidate_List_filePath_prefix + repo.replace('/', '.') + '.txt'
     print(candidatePR_input_file)
