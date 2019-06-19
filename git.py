@@ -82,10 +82,10 @@ def check_too_big(pull):
         pull = get_pull(pull["base"]["repo"]["full_name"], pull["number"], True)
 
     if pull["changed_files"] > 50:
-        print('more than 50 changed files')
+#         print('more than 50 changed files')
         return True
     if (pull["additions"] >= 10000) or (pull["deletions"] >= 10000):
-        print('more than 10000 Loc changes')
+#         print('more than 10000 Loc changes')
         return True
     return False
 
@@ -94,7 +94,7 @@ check_large_cache = {}
 
 
 def check_large(pull):
-    print ("check_large:" + str(pull['number']))
+#     print ("check_large:" + str(pull['number']))
     global check_large_cache
     index = (pull["base"]["repo"]["full_name"], pull["number"])
     if index in check_large_cache:
@@ -143,7 +143,7 @@ file_list_cache = {}
 
 
 def fetch_pr_info(pull, must_in_local=False):
-    print ("fetch_pr_info:" + str(pull['number']))
+#     print ("fetch_pr_info:" + str(pull['number']))
     global file_list_cache
     ind = (pull["base"]["repo"]["full_name"], pull["number"])
     if ind in file_list_cache:

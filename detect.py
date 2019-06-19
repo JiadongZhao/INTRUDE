@@ -69,7 +69,6 @@ def have_commit_overlap(p1, p2):
 # returns similarity score and feature vector
 def get_topK(repo, num1, topK=10, print_progress=False, use_way='new'):
     global last_detect_repo
-    global feature_vector
     if last_detect_repo != repo:
         last_detect_repo = repo
         init_model_with_repo(repo)
@@ -92,7 +91,7 @@ def get_topK(repo, num1, topK=10, print_progress=False, use_way='new'):
 
     #check if any flags are active & violated
     for pull in pulls:
-        print("compare " + str(pullA['number']) + " " + str(pull['number']))
+        feature_vector = {}
         cnt += 1
 
         # too many changed files check
@@ -104,6 +103,7 @@ def get_topK(repo, num1, topK=10, print_progress=False, use_way='new'):
 #             time_diff = abs((get_time(pullA["updated_at"]) - get_time(pull["updated_at"])).days)
 #  updated_at is not reliable, see example: https://github.com/jquery/jquery/pull/1002
             time_diff = abs((get_time(pullA["created_at"]) - get_time(pull["created_at"])).days)
+            print ("time diff" + time_diff)
             if  time_diff >= 2 * 365: # more than 2 years
                 continue
 
@@ -117,7 +117,6 @@ def get_topK(repo, num1, topK=10, print_progress=False, use_way='new'):
                 continue
 
             # case of following up work (not sure)
-            print("check if it is follow up work")
             if str(pull["number"]) in (get_pr_and_issue_numbers(pullA["title"]) + \
                                        get_pr_and_issue_numbers(pullA["body"])):
                 continue
@@ -158,6 +157,7 @@ def get_topK(repo, num1, topK=10, print_progress=False, use_way='new'):
                 sys.stdout.flush()
         
         if use_way == 'new':
+            print("compare " + str(pullA['number']) + " " + str(pull['number']))
             feature_vector = get_pr_sim_vector(pullA, pull)        
             results[pull["number"]] = c.predict_proba([feature_vector])[0][1]
         elif 'leave' in use_way:
@@ -195,7 +195,7 @@ def run_list(repo, renew=False, run_num=200, rerun=False):
             continue
         
         num2, prob = topk[0][0], topk[0][1]
-        vet = get_pr_sim_vector(pull, get_pull(repo, num2))
+        vet = (pull, get_pull(repo, num2))
         
         with open(out_path, 'a+') as outf:
             print("\t".join([repo, str(num1), str(num2), "%.4f" % prob] + \
@@ -216,7 +216,8 @@ def detect_one(repo, num):
 
     ret, feature_vector = get_topK(repo, num , 1, True)
     if len(ret) < 1:
-        return -1, -1
+        print ("no result")
+        return -1, -1, -1
     else:
         return ret[0][0], ret[0][1], feature_vector
         # return ret[0][0], ret[0][1]

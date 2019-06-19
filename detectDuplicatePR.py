@@ -81,6 +81,7 @@ def work():
                     repo, pr_id = t.split()
                     cnt += 1
                     dupPR_id, similarity, feature_vector = detect.detect_one(repo, pr_id)
+                    if(dupPR_id == -1 and similarity == -1 and feature_vector == -1): continue
                     with open(init.dupPR_result_filePath_prefix + repo.replace('/', '.') + '.txt', 'a') as outf:
                         print("\t".join(
                             [repo, str(pr_id), str(dupPR_id)] + ["%.15f" % similarity] + ["%.2f" % x for x in
