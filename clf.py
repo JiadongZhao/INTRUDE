@@ -96,9 +96,7 @@ def init_model_with_pulls(pulls, save_id=None):
                     c.append(get_code_tokens(p)[0])
             except Exception as e:
                 print('Error on get', pull['url'])
-        if(len(c)==0):
-            print("no doc to analyze, pass")
-            pass
+        
         init_code_model_from_tokens(c, save_id + '_code' if save_id is not None else None)
 
 
