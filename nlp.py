@@ -1,7 +1,7 @@
 from gensim import corpora, models, similarities, matutils
+import init
 
-
-model_path = '/DATA/luyao/model/'
+model_path = init.LOCAL_DATA_PATH + '/model/'
 lsi_topic_num = 500
 
 

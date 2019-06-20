@@ -1,6 +1,3 @@
-
-
-
 # import nltk
 # nltk.download()
 from git import *
@@ -23,6 +20,7 @@ detect.filter_version_number_diff = True
 
 add_flag = True
 
+
 #
 # get open PRs to compare this repo to
 #
@@ -43,7 +41,7 @@ def getCandidatePRs(repo):
         return has
 
     # get all pr
-    pull_list = get_repo_info(repo, 'pull',renew=True)  # get all info about all PRs, sort by ID
+    pull_list = get_repo_info(repo, 'pull', renew=True)  # get all info about all PRs, sort by ID
     pull_list = sorted(pull_list, key=lambda x: int(x['number']), reverse=True)
     print("length : " + str(len(pull_list)))
 
@@ -80,20 +78,21 @@ def work():
         getCandidatePRs(repo)
         candidatePR_input_file = init.PR_candidate_List_filePath_prefix + repo.replace('/', '.') + '.txt'
 
-        try:
-            with open(candidatePR_input_file) as f:
-                for t in f.readlines():
-                    repo, pr_id = t.split()
-                    cnt += 1
-                    dupPR_id, similarity, feature_vector = detect.detect_one(repo, pr_id)
-                    if(dupPR_id == -1 and similarity == -1 and feature_vector == -1): continue
-                    with open(init.dupPR_result_filePath_prefix + repo.replace('/', '.') + '.txt', 'a') as outf:
-                        print("\t".join(
-                            [repo, str(pr_id), str(dupPR_id)] + ["%.15f" % similarity] + ["%.2f" % x for x in
-                                                                                          feature_vector]), file=outf)
-        except FileNotFoundError:
-            print("file not exist, continue")
-            continue
+        # try:
+        with open(candidatePR_input_file) as f:
+            for t in f.readlines():
+                repo, pr_id = t.split()
+                cnt += 1
+                dupPR_id, similarity, feature_vector = detect.detect_one(repo, pr_id)
+                if (dupPR_id == -1 and similarity == -1 and feature_vector == -1): continue
+                with open(init.dupPR_result_filePath_prefix + repo.replace('/', '.') + '.txt', 'a') as outf:
+                    print("\t".join(
+                        [repo, str(pr_id), str(dupPR_id)] + ["%.15f" % similarity] + ["%.2f" % x for x in
+                                                                                      feature_vector]), file=outf)
+    # except FileNotFoundError:
+    #     print(str(f.name))
+    #     print("file not exist, continue")
+    #     continue
 
 
 if __name__ == "__main__":

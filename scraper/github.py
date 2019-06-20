@@ -11,7 +11,7 @@ try:
 except ImportError:
     settings = object()
 
-_tokens = getattr(settings, "SCRAPER_GITHUB_API_TOKENS", [])
+# _tokens = getattr(settings, "SCRAPER_GITHUB_API_TOKENS", [])
 
 with open('./data/token.txt', 'r') as file:
     _tokens = [line.rstrip('\n') for line in file]
