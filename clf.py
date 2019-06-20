@@ -37,12 +37,12 @@ data_folder = 'data/clf'
 
 dataset = [
     [data_folder + '/first_msr_pairs.txt', 1, 'train'],
-    [data_folder + '/second_msr_pairs.txt', 1, 'test'], 
-#     [data_folder + '/first_nondup.txt', 0, 'train'], 
+    [data_folder + '/second_msr_pairs.txt', 1, 'test'],
+#     [data_folder + '/first_nondup.txt', 0, 'train'],
 #     [data_folder + '/second_nondup.txt', 0, 'test'], # model 0
 #     [data_folder + '/testSet_Model1.txt', 0, 'test'], #model 1
 #     [data_folder + '/testSet_Model2.txt', 0, 'test'],  #model 2
-    
+
     #### consequtive non dup pr pairs
     [data_folder + '/consecutive_NonDupPR_pairs_training.txt', 0, 'train'],
     [data_folder + '/consecutive_NonDupPR_pairs_testing.txt', 0, 'test'],
@@ -78,14 +78,14 @@ print('Model Data Save Path = ', model_data_save_path_suffix)
 # ------------------------------------------------------------
 
 # init NLP model
-def init_model_with_pulls(pulls, save_id=None):    
+def init_model_with_pulls(pulls, save_id=None):
     t = [str(pull["title"]) for pull in pulls]
     b = []
     for pull in pulls:
         if pull["body"] and (len(pull["body"]) <= 2000):
             b.append(pull["body"])
     init_model_from_raw_docs(t + b, save_id)
-    
+
     if code_sim_type == 'tfidf':
         c = []
         for pull in pulls: # only added code
@@ -96,7 +96,9 @@ def init_model_with_pulls(pulls, save_id=None):
                     c.append(get_code_tokens(p)[0])
             except Exception as e:
                 print('Error on get', pull['url'])
-        
+        if(len(c) == 0):
+            print(" no pr available")
+            return None
         init_code_model_from_tokens(c, save_id + '_code' if save_id is not None else None)
 
 
@@ -107,11 +109,12 @@ def init_model_with_repo(repo, save_id=None):
     else:
         save_id = repo.replace('/','_') + '_' + save_id
     try:
-        init_model_with_pulls([], save_id)
+        result= init_model_with_pulls([], save_id)
     except:
         # init_model_with_pulls(shuffle(get_repo_info(repo, 'pull'))[:10000], save_id)
-        init_model_with_pulls(get_repo_info(repo, 'pull', renew = False), save_id)
+        result = init_model_with_pulls(get_repo_info(repo, 'pull', renew = False), save_id)
 
+    if (result == None): return None
 
 # Calculate feature vector.
 def get_sim(repo, num1, num2):
@@ -124,11 +127,11 @@ def get_sim_wrap(args):
 
 def get_feature_vector(data, label, renew=False, out=None):
     print('Model Data Input=', data)
-    
+
     default_path = data.replace('.txt','') + '_feature_vector'
     out = default_path if out is None else default_path + '_' + out
     X_path, y_path = out + '_X.json', out + '_y.json'
-    
+
     if os.path.exists(X_path) and os.path.exists(y_path) and (not renew):
         print('warning: feature vector already exists!', out)
         X = localfile.get_file(X_path)
@@ -136,7 +139,7 @@ def get_feature_vector(data, label, renew=False, out=None):
         return X, y
 
     X, y = [], []
-    
+
     # run with all PR's info model
     p = {}
     pr_len = 0
@@ -144,11 +147,11 @@ def get_feature_vector(data, label, renew=False, out=None):
         all_pr = f.readlines()
         pr_len = len(all_pr)
     count = 0
-   
+
     for l in all_pr:
         print (str(count/pr_len) + ' pr:' + l)
         r, n1, n2 = l.strip().split()
-        
+
         if 'msr_pairs' not in data:
             print ('check if there are too much texts in the PR description.. such as template..')
             if check_large(get_pull(r, n1)) or check_large(get_pull(r, n2)):
@@ -158,33 +161,33 @@ def get_feature_vector(data, label, renew=False, out=None):
             p[r] = []
         p[r].append((n1, n2, label))
         count = count + 1
-    
+
     print('all=', len(all_pr))
 
     out_file = open(out + '_X_and_Y.txt', 'w+')
-    
+
     for r in p:
         init_model_with_repo(r)
-    
+
     for r in p:
         print('Start running on', r)
 
         # init NLP model
         init_model_with_repo(r)
-        
+
         print('pairs num=', len(p[r]))
-        
-        
+
+
         # sequence
         cnt = 0
         for z in p[r]:
             # print(r, z[0], z[1])
-            
+
             x0, y0 = get_sim(r, z[0], z[1]), z[2]
             X.append(x0)
             y.append(y0)
             print(r, z[0], z[1], x0, y0, file=out_file)
-            
+
             cnt += 1
             if cnt % 100 == 0:
                 print('current:', r, cnt)
@@ -211,10 +214,10 @@ def get_feature_vector(data, label, renew=False, out=None):
 
 # Build classification model
 def classify(model_type=default_model):
-    def model_data_prepare(dataset):        
+    def model_data_prepare(dataset):
         X_train, y_train = [], []
         X_test, y_test = [], []
-        
+
         for s in dataset:
             new_X, new_y = get_feature_vector(s[0], s[1], model_data_renew_flag, model_data_save_path_suffix)
             if s[2] == 'train':
@@ -235,13 +238,13 @@ def classify(model_type=default_model):
         # ran shuffle with train set and test set
         if model_data_random_shuffle_flag:
             X_train, y_train, X_test, y_test = get_ran_shuffle(X_train + X_test, y_train + y_test)
-            
+
         return (X_train, y_train, X_test, y_test)
-    
+
     print('--------------------------')
     print('Loading Data')
     X_train, y_train, X_test, y_test = model_data_prepare(dataset)
-    
+
     '''
     X_train_new, y_train_new = [], []
     
@@ -255,7 +258,7 @@ def classify(model_type=default_model):
 
     X_train, y_train = X_train_new, y_train_new
     '''
-    
+
     if part_params:
         def extract_col(a, c):
             for i in range(len(a)):
@@ -267,20 +270,20 @@ def classify(model_type=default_model):
         extract_col(X_train, part_params)
         extract_col(X_test, part_params)
         print('extract=', part_params)
-    
+
     print('--------------------------')
     print('Size of Dataset: training_set', len(X_train), 'testing_set', len(X_test), 'feature_length=', len(X_train[0]))
     #X_train_aug = X_train
     #y_train_aug = y_train
     #X_train_aug += [t[0] for t in s if t[1]==1] * 5
     #y_train_aug += [1 for t in s if t[1]==1] * 5
-    
+
     # model choice
 
     # clf = GradientBoostingClassifier(n_estimators=160, learning_rate=1.0, max_depth=15, random_state=0).fit(X_train, y_train)
     # clf = AdaBoostClassifier(n_estimators=60).fit(X_train, y_train)
     # clf =  DecisionTreeClassifier(max_depth=50)
-    
+
     print('------ model: ', model_type, '------' )
     if model_type == 'SVM':
         clf = svm.SVC(random_state=0, probability=1)
@@ -298,27 +301,27 @@ def classify(model_type=default_model):
                 clf = GradientBoostingClassifier(n_estimators=n_est, learning_rate=0.01, max_depth=m_d, random_state=0)
                 #clf = RUSBoostClassifier(random_state=0, n_estimators=250, learning_rate=0.01)
                 s = sorted(zip(X_train, y_train), reverse=True)
-               
+
                 scores = cross_val_score(clf, X_train, y_train, cv=5)
                 print("n_estimators:", n_est, "max_depth:", m_d)
                 print(scores.mean())
-        
-    
+
+
                 clf = clf.fit(X_train, y_train)
-                
+
                  # Predict
                 acc = clf.score(X_test, y_test)
                 print('Mean Accuracy:', acc)
-    
+
                 y_score = clf.decision_function(X_test)
                 average_precision = average_precision_score(y_test, y_score)
                 print('Average precision score: {0:0.4f}'.format(average_precision))
-    
+
                 f1_s = f1_score(y_test, clf.predict(X_test))
                 print('F1 score: {0:0.4f}'.format(f1_s))
-    
+
                 print(acc, average_precision, f1_s, sep='\t')
-   
+
                 if draw_pic:
         # draw the PR-curve
                     precision, recall, _ = precision_recall_curve(y_test, y_score)
@@ -331,14 +334,14 @@ def classify(model_type=default_model):
                     plt.ylim([0.0, 1.05])
                     plt.xlim([0.0, 1.0])
                     plt.title('Precision-Recall curve')
-    
+
                 if draw_roc:
         # Compute ROC curve and ROC area for each class
                     fpr, tpr, _ = roc_curve(y_test, y_score)
                     roc_auc = auc(fpr, tpr)
 
                     plt.figure()
-        
+
                     plt.plot(fpr, tpr, color='darkorange',
                         lw=2, label='ROC curve (area = %0.5f)' % roc_auc)
 
@@ -380,13 +383,13 @@ def classify(model_type=default_model):
     print('threshold re-call =', 1.0 * t_rec / t_rec_tot)
     print('threshold precision =', 1.0 * t_pre / t_pre_tot)
     '''
-        
-    
+
+
     # model result
     # print('coef in model = ', clf.coef_)
     # print(clf.intercept_)
     # print(clf.loss_function_)
-    
+
     # retrain
     #y_train_score = clf.decision_function(X_train)
     #s = sorted(zip(y_train_score, X_train, y_train), reverse=True)
@@ -398,8 +401,8 @@ def classify(model_type=default_model):
     #clf = clf.fit(X_train_new, y_train_new)
 
 
-    
-   
+
+
     return clf
 
 if __name__ == "__main__":
