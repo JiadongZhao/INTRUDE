@@ -123,7 +123,7 @@ def check_large(pull):
             return True
     '''
 
-    path = '/DATA/luyao/pr_data/%s/%s/raw_diff.json' % (pull["base"]["repo"]["full_name"], pull["number"])
+    path = init.LOCAL_DATA_PATH+ '/pr_data/%s/%s/raw_diff.json' % (pull["base"]["repo"]["full_name"], pull["number"])
     if os.path.exists(path) and (os.path.getsize(path) >= 50 * 1024):
         return True
 
@@ -149,7 +149,7 @@ def fetch_pr_info(pull, must_in_local=False):
     if ind in file_list_cache:
         return file_list_cache[ind]
 
-    path = '/DATA/luyao/pr_data/%s/%s' % (pull["base"]["repo"]["full_name"], pull["number"])
+    path = LOCAL_DATA_PATH+'/pr_data/%s/%s' % (pull["base"]["repo"]["full_name"], pull["number"])
     parse_diff_path = path + '/parse_diff.json'
     raw_diff_path = path + '/raw_diff.json'
     pull_files_path = path + '/pull_files.json'

@@ -96,9 +96,9 @@ def init_model_with_pulls(pulls, save_id=None):
                     c.append(get_code_tokens(p)[0])
             except Exception as e:
                 print('Error on get', pull['url'])
-        if(len(c) == 0):
-            print(" no pr available")
-            return None
+        # if(len(c) == 0):
+        #     print(" no pr available")
+        #     return None
         init_code_model_from_tokens(c, save_id + '_code' if save_id is not None else None)
 
 
@@ -109,12 +109,14 @@ def init_model_with_repo(repo, save_id=None):
     else:
         save_id = repo.replace('/','_') + '_' + save_id
     try:
-        result= init_model_with_pulls([], save_id)
+        init_model_with_pulls([], save_id)
+        # result= init_model_with_pulls([], save_id)
     except:
         # init_model_with_pulls(shuffle(get_repo_info(repo, 'pull'))[:10000], save_id)
-        result = init_model_with_pulls(get_repo_info(repo, 'pull', renew = False), save_id)
+        init_model_with_pulls(get_repo_info(repo, 'pull', renew = False), save_id)
+        # result = init_model_with_pulls(get_repo_info(repo, 'pull', renew = False), save_id)
 
-    if (result == None): return None
+    # if (result == None): return None
 
 # Calculate feature vector.
 def get_sim(repo, num1, num2):
