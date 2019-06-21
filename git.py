@@ -223,7 +223,7 @@ def fetch_commit(url, renew=False):
         except:
             pass
 
-    c = api.get(url)
+    c = api.request(url)
     time.sleep(0.7)
     file_list = []
     for f in c['files']:
@@ -297,12 +297,14 @@ def fetch_file_list(pull, renew=False):
         except:
             pass
 
-    t = api.get('repos/%s/pulls/%s/files?page=3' % (repo, num))
+    # t = api.get('repos/%s/pulls/%s/files?page=3' % (repo, num))
+    t = api.request('repos/%s/pulls/%s/files?page=3' % (repo, num))
     file_list = []
     if len(t) > 0:
         raise Exception('too big', pull['html_url'])
     else:
-        li = api.request( 'repos/%s/pulls/%s/files' % (repo, num), True)
+        li = api.request( 'repos/%s/pulls/%s/files' % (repo, num), paginate=True)
+        # li = api.request( 'repos/%s/pulls/%s/files' % (repo, num), True)
         time.sleep(0.8)
         for f in li:
             if f.get('changes', 0) <= 5000 and ('filename' in f) and ('patch' in f):
