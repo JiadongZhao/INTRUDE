@@ -25,6 +25,12 @@ add_flag = True
 # get open PRs to compare this repo to
 #
 def getCandidatePRs(repo):
+
+    # todo get all open 1) LOCAL PR 2) new PR 3) list as output
+    #  check local open PRs
+
+
+
     candidatePR_input_file = init.PR_candidate_List_filePath_prefix + repo.replace('/', '.') + '.txt'
     print(candidatePR_input_file)
 

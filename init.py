@@ -20,6 +20,7 @@ else:
     PR_candidate_List_filePath_prefix = LOCAL_DATA_PATH +'/PRCandidate/candidate_'
     repos = [line.rstrip('\n') for line in open(monitored_repoList_filePath)]
     dupPR_result_filePath_prefix = LOCAL_DATA_PATH + '/dupPR/repo_'
+    local_pr_data_dir = LOCAL_DATA_PATH + '/pr_data/'
 
 
 pr_date_difference_inDays= 365
