@@ -30,3 +30,8 @@ def getOpenPRs():
                                                 f.write(
                                                     repo + ',' + str(pr['number']) + ',' + pr['created_at'] + ',' + pr[
                                                         'url'] + '\n')
+
+
+
+if __name__ == "__main__":
+    getOpenPRs()
