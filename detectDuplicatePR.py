@@ -7,6 +7,8 @@ import util.timeUtil
 import datetime
 
 import detect
+from datetime import datetime
+from threading import Timer
 
 detect.speed_up = True
 detect.filter_larger_number = True
@@ -31,17 +33,17 @@ def getCandidatePRs(repo):
     candidatePR_input_file = init.PR_candidate_List_filePath_prefix + repo.replace('/', '.') + '.txt'
     print(candidatePR_input_file)
 
-    has = set()
+    # has = set()
     prCandidate_list = []
-    if os.path.exists(candidatePR_input_file):
-        if not add_flag:
-            raise Exception('file already exists!')
-        with open(candidatePR_input_file) as f:
-            for t in f.readlines():
-                r, n = t.strip().split()
-                has.add((r, n))
-        print("length : " + str(len(has)))
-        return has
+    # if os.path.exists(candidatePR_input_file):
+    #     if not add_flag:
+    #         raise Exception('file already exists!')
+    #     with open(candidatePR_input_file) as f:
+    #         for t in f.readlines():
+    #             r, n = t.strip().split()
+    #             has.add((r, n))
+    #     print("length : " + str(len(has)))
+    #     return has
 
     # get all pr
     pull_list = get_repo_info(repo, 'pull', renew=True)  # get all info about all PRs, sort by ID
@@ -74,8 +76,6 @@ def getCandidatePRs(repo):
     return prCandidate_list
 
 
-
-
 def work():
     cnt = 0
     for repo in init.repos:
@@ -100,5 +100,15 @@ def work():
             continue
 
 
+def exeEveryDay():
+    x = datetime.today()
+    print('today : ' + str(x))
+    y = x.replace(day=x.day + 1, hour=1, minute=0, second=0, microsecond=0)
+    delta_t = y - x
+    secs = delta_t.seconds + 1
+    t = Timer(secs, work)
+    t.start()
+
+
 if __name__ == "__main__":
-    work()
+    exeEveryDay()
