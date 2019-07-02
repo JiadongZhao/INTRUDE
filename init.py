@@ -23,7 +23,7 @@ else:
     local_pr_data_dir = LOCAL_DATA_PATH + '/pr_data/'
 
 
-pr_date_difference_inDays= 365
+pr_date_difference_inDays= 2
 
 # print('monitored_repoList_filePath:' + monitored_repoList_filePath)
 # print('LOCAL_DATA_PATH:' + LOCAL_DATA_PATH)

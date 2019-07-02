@@ -1,6 +1,8 @@
 import init
 import sys, os
 import json
+import util.timeUtil
+import datetime
 
 local_pr_data_dir = init.local_pr_data_dir
 # def getCandidatePRs(repo):
@@ -8,6 +10,7 @@ local_pr_data_dir = init.local_pr_data_dir
 #     print(candidatePR_input_file)
 
 output = local_pr_data_dir + 'openPRList.txt'
+updated_output = local_pr_data_dir + 'recent_openPRList.txt'
 
 
 def getOpenPRs():
@@ -32,6 +35,21 @@ def getOpenPRs():
                                                         'url'] + '\n')
 
 
+def filterOutOldOpenPRs():
+    with open(output) as source_file:
+        for line in source_file:
+            cols = [str(x) for x in line.split(',')]
+            createdAt = cols[2]
+            now = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
+            diff = util.timeUtil.days_between(now, createdAt)
+            print(cols)
+            if (diff < 60):
+                print(cols)
+                with open(updated_output, 'a') as f:
+                    print(cols)
+                    f.write(",".join(cols))
+
 
 if __name__ == "__main__":
     getOpenPRs()
+    filterOutOldOpenPRs()

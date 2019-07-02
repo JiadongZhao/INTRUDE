@@ -22,14 +22,11 @@ add_flag = True
 
 
 #
-# get open PRs to compare this repo to
+# get all open PRs to compare this repo to
 #
 def getCandidatePRs(repo):
-
     # todo get all open 1) LOCAL PR 2) new PR 3) list as output
     #  check local open PRs
-
-
 
     candidatePR_input_file = init.PR_candidate_List_filePath_prefix + repo.replace('/', '.') + '.txt'
     print(candidatePR_input_file)
@@ -62,7 +59,7 @@ def getCandidatePRs(repo):
             continue
 
         if (util.timeUtil.days_between(now, current_pr_createdAt) > init.pr_date_difference_inDays):
-            print("older than a year " + str(current_pr_id) + "stop")
+            print("older than " + init.pr_date_difference_inDays + " days " + str(current_pr_id) + "stop")
             break
         print('current pr :' + str(
             current_pr_id) + " created_at: " + current_pr_createdAt + " in repo:" + repo)  # set PR as the one to compare with consecutives (below)
@@ -77,13 +74,15 @@ def getCandidatePRs(repo):
     return prCandidate_list
 
 
+
+
 def work():
     cnt = 0
     for repo in init.repos:
         print("get open PRs from repo: " + repo)
         getCandidatePRs(repo)
-        candidatePR_input_file = init.PR_candidate_List_filePath_prefix + repo.replace('/', '.') + '.txt'
 
+        candidatePR_input_file = init.PR_candidate_List_filePath_prefix + repo.replace('/', '.') + '.txt'
         try:
             with open(candidatePR_input_file) as f:
                 for t in f.readlines():
