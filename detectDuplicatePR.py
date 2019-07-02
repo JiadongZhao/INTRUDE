@@ -59,7 +59,7 @@ def getCandidatePRs(repo):
             continue
 
         if (util.timeUtil.days_between(now, current_pr_createdAt) > init.pr_date_difference_inDays):
-            print("older than " + init.pr_date_difference_inDays + " days " + str(current_pr_id) + "stop")
+            print("older than " + str(init.pr_date_difference_inDays) + " days " + str(current_pr_id) + "stop")
             break
         print('current pr :' + str(
             current_pr_id) + " created_at: " + current_pr_createdAt + " in repo:" + repo)  # set PR as the one to compare with consecutives (below)
