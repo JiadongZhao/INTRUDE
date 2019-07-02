@@ -164,7 +164,6 @@ def get_topK(repo, num1, topK=10, print_progress=False, use_way='new'):
                 sys.stdout.flush()
 
         if use_way == 'new':
-            print("compare " + str(pullA['number']) + " " + str(pull['number']))
             feature_vector = get_pr_sim_vector(pullA, pull)
             results_featureVector[pull["number"]] = feature_vector
             results[pull["number"]] = c.predict_proba([feature_vector])[0][1]
