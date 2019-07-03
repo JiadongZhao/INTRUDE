@@ -33,17 +33,17 @@ def getCandidatePRs(repo):
     candidatePR_input_file = init.PR_candidate_List_filePath_prefix + repo.replace('/', '.') + '.txt'
     print(candidatePR_input_file)
 
-    # has = set()
+    has = set()
     prCandidate_list = []
-    # if os.path.exists(candidatePR_input_file):
-    #     if not add_flag:
-    #         raise Exception('file already exists!')
-    #     with open(candidatePR_input_file) as f:
-    #         for t in f.readlines():
-    #             r, n = t.strip().split()
-    #             has.add((r, n))
-    #     print("length : " + str(len(has)))
-    #     return has
+    if os.path.exists(candidatePR_input_file):
+        if not add_flag:
+            raise Exception('file already exists!')
+        with open(candidatePR_input_file) as f:
+            for t in f.readlines():
+                r, n = t.strip().split()
+                has.add((r, n))
+        print("length : " + str(len(has)))
+        return has
 
     # get all pr
     pull_list = get_repo_info(repo, 'pull', renew=True)  # get all info about all PRs, sort by ID
@@ -55,7 +55,7 @@ def getCandidatePRs(repo):
         current_pr_createdAt = current_pr['created_at']
 
         # get date for today, if the pr was created 1 yr ago, then stop
-        now = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
+        now = datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
         if (current_pr['state'] == 'closed'):
             #             print("closed pr " + str(current_pr_id))
             continue
@@ -103,7 +103,7 @@ def work():
 def exeEveryDay():
     x = datetime.today()
     print('today : ' + str(x))
-    y = x.replace(day=x.day + 1, hour=17, minute=50, second=0, microsecond=0)
+    y = x.replace(day=x.day + 1, hour=17, minute=56, second=0, microsecond=0)
     delta_t = y - x
     secs = delta_t.seconds + 1
     t = Timer(secs, work)
@@ -111,4 +111,5 @@ def exeEveryDay():
 
 
 if __name__ == "__main__":
-    exeEveryDay()
+    # exeEveryDay()
+    work()

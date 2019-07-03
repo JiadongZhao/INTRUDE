@@ -5,7 +5,7 @@ FLAGS_load_language_data = False
 text_suffix = []
 general_stopwords = []
 
-language_data_path = os.path.dirname(os.path.realpath(__file__)) + '/data'
+language_data_path = os.path.dirname(os.path.realpath(__file__)) + '/language'
 
 def init():
     """ Load the language data.
