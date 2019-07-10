@@ -66,7 +66,7 @@ def getCandidatePRs(repo):
         print('current pr :' + str(
             current_pr_id) + " created_at: " + current_pr_createdAt + " in repo:" + repo)  # set PR as the one to compare with consecutives (below)
 
-        prCandidate_list.append((repo, str(current_pr_id)))
+        prCandidate_list.append((repo, str(current_pr_id),current_pr_createdAt))
 
     print("length of pr candidates: " + str(len(prCandidate_list)))
     for pair in prCandidate_list:
@@ -86,26 +86,27 @@ def work():
         try:
             with open(candidatePR_input_file) as f:
                 for t in f.readlines():
-                    repo, pr_id = t.split()
+                    repo, pr_id, created_at = t.split()
                     cnt += 1
                     dupPR_id, similarity, feature_vector = detect.detect_one(repo, pr_id)
                     if (dupPR_id == -1 and similarity == -1 and feature_vector == -1): continue
                     with open(init.dupPR_result_filePath_prefix +'/'+ today_str +'/'+ repo.replace('/', '.') + '.txt', 'a') as outf:
                         print(repo, str(pr_id), str(dupPR_id), "%.4f" % similarity)
                         print("\t".join(
-                            [repo, str(pr_id),
+                            [repo, str(pr_id), created_at,
                              str(dupPR_id)] + ["%.15f" % similarity] + ["%.2f" % x for x in feature_vector]), file=outf)
         except FileNotFoundError:
             print("file not exist, continue")
             continue
 
-
+today = ''
 def exeEveryDay():
     x = datetime.today()
     today_str = str(x).split(" ")[0]
     print('today : ' + today_str)
     
     y = x.replace(day=x.day + 1, hour=15, minute=0, second=0, microsecond=0)
+ 
     delta_t = y - x
     secs = delta_t.seconds + 1
     t = Timer(secs, work)
