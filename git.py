@@ -9,7 +9,7 @@ import fetch_raw_diff
 import init
 
 # from flask import Flask
-from flask_github import GitHub
+# from flask_github import GitHub
 
 import scraper
 from util import localfile
