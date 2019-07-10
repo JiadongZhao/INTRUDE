@@ -21,7 +21,7 @@ detect.filter_same_author_and_already_mentioned = True
 detect.filter_version_number_diff = True
 
 add_flag = True
-
+today_str = '2019-07-10'
 
 #
 # get all open PRs to compare this repo to
@@ -90,7 +90,7 @@ def work():
                     cnt += 1
                     dupPR_id, similarity, feature_vector = detect.detect_one(repo, pr_id)
                     if (dupPR_id == -1 and similarity == -1 and feature_vector == -1): continue
-                    with open(init.dupPR_result_filePath_prefix + repo.replace('/', '.') + '.txt', 'a') as outf:
+                    with open(init.dupPR_result_filePath_prefix +'/'+ today_str +'/'+ repo.replace('/', '.') + '.txt', 'a') as outf:
                         print(repo, str(pr_id), str(dupPR_id), "%.4f" % similarity)
                         print("\t".join(
                             [repo, str(pr_id),
@@ -102,8 +102,10 @@ def work():
 
 def exeEveryDay():
     x = datetime.today()
-    print('today : ' + str(x))
-    y = x.replace(day=x.day + 1, hour=17, minute=56, second=0, microsecond=0)
+    today_str = str(x).split(" ")[0]
+    print('today : ' + today_str)
+    
+    y = x.replace(day=x.day + 1, hour=15, minute=0, second=0, microsecond=0)
     delta_t = y - x
     secs = delta_t.seconds + 1
     t = Timer(secs, work)
@@ -111,5 +113,5 @@ def exeEveryDay():
 
 
 if __name__ == "__main__":
-    # exeEveryDay()
+#     exeEveryDay()
     work()
