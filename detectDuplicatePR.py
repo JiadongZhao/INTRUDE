@@ -21,7 +21,7 @@ detect.filter_same_author_and_already_mentioned = True
 detect.filter_version_number_diff = True
 
 add_flag = True
-today_str = '2019-07-10'
+today_str = '2019-07-10-withdate'
 
 #
 # get all open PRs to compare this repo to
