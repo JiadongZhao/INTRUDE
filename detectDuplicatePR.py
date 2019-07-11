@@ -39,11 +39,12 @@ def getCandidatePRs(repo):
     flag_checkedPRListToday = False
 
     # get date for today, if the pr was created 1 yr ago, then stop
-    now = datetime.now().strftime("%Y-%m-%d%H:%M:%S")
+
     if os.path.exists(candidatePR_input_file):
 
         # get last modification time
         modTimesinceEpoc = os.path.getmtime(candidatePR_input_file)
+        now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         # Convert seconds since epoch to readable timestamp
         modificationTime = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(modTimesinceEpoc))
 
@@ -73,7 +74,7 @@ def getCandidatePRs(repo):
         if (current_pr['state'] == 'closed'):
             #             print("closed pr " + str(current_pr_id))
             continue
-
+        now = datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
         if (util.timeUtil.days_between(now, current_pr_createdAt) > init.pr_date_difference_inDays):
             print("older than " + str(init.pr_date_difference_inDays) + " days " + str(current_pr_id) + "stop")
             break
