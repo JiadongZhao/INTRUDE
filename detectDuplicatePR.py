@@ -74,7 +74,7 @@ def getCandidatePRs(repo):
             #             print("closed pr " + str(current_pr_id))
             continue
 
-        if (util.timeUtil.days_between_noTZ(now, current_pr_createdAt) > init.pr_date_difference_inDays):
+        if (util.timeUtil.days_between(now, current_pr_createdAt) > init.pr_date_difference_inDays):
             print("older than " + str(init.pr_date_difference_inDays) + " days " + str(current_pr_id) + "stop")
             break
         print('current pr :' + str(
