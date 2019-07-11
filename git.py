@@ -191,33 +191,28 @@ def fetch_pr_info(pull, must_in_local=False):
 
 
 # -------------------About Repo--------------------------------------------------------
-#
-# def get_repo_info(repo, type, renew):
-#     old_openPR_list, latest_pr = getOldOpenPRs(repo)
-#
-#     save_path = LOCAL_DATA_PATH + '/pr_data/' + repo + '/%s_list.json' % type
-#     if type == 'fork':
-#         save_path = LOCAL_DATA_PATH + '/result/' + repo + '/forks_list.json'
-#
-#     if (os.path.exists(save_path)) and (not renew):
-#         try:
-#             return localfile.get_file(save_path)
-#         except:
-#             pass
-#
-#     print('start fetch new list for ', repo, type)
-#     if (type == 'pull') or (type == 'issue'):
-#         page_index = 1
-#         while(True):
-#             ret = api.requestPR('repos/%s/%ss' % (repo, type), state='all', page=page_index)
-#             print('')
-#     else:
-#         if type == 'branch':
-#             type = 'branche'
-#         ret = api.request( 'repos/%s/%ss' % (repo, type), True)
-#
-#     localfile.write_to_file(save_path, ret)
-#     return ret
+def get_repo_info(repo, type, renew ):
+    save_path = LOCAL_DATA_PATH + '/pr_data/' + repo + '/%s_list.json' % type
+    if type == 'fork':
+        save_path = LOCAL_DATA_PATH + '/result/' + repo + '/forks_list.json'
+
+    if (os.path.exists(save_path)) and (not renew):
+        try:
+            return localfile.get_file(save_path)
+        except:
+            pass
+
+    print('start fetch new list for ', repo, type)
+    if (type == 'pull') or (type == 'issue'):
+        ret = api.request('repos/%s/%ss' % (repo, type), state='all', paginate= True)
+    else:
+        if type == 'branch':
+            type = 'branche'
+        ret = api.request( 'repos/%s/%ss' % (repo, type), True)
+
+    localfile.write_to_file(save_path, ret)
+    return ret
+
 
 
 def get_repo_info_forPR(repo, type, renew):
