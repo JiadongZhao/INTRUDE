@@ -13,8 +13,8 @@ else:
         LOCAL_DATA_PATH = '/DATA/luyao'
     else:
         LOCAL_DATA_PATH = '/Users/shuruiz/Work/researchProjects'
-    monitored_repoList_filePath = 'data/2000forks-repoList.csv'
-    # monitored_repoList_filePath = 'data/test_repo_list.txt'
+    # monitored_repoList_filePath = 'data/2000forks-repoList.csv'
+    monitored_repoList_filePath = 'data/test_repo_list.txt'
     PR_pairList_filePath_prefix = 'data/consecutive_PR_pairs_'
     PR_candidate_List_filePath_prefix = 'data/candidate_PR_'
     PR_candidate_List_filePath_prefix = LOCAL_DATA_PATH +'/PRCandidate/candidate_'

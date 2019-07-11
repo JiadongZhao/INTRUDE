@@ -33,20 +33,35 @@ def getCandidatePRs(repo):
 
     candidatePR_input_file = init.PR_candidate_List_filePath_prefix + repo.replace('/', '.') + '.txt'
     print(candidatePR_input_file)
-    with open(candidatePR_input_file, 'w') as f:  # opens file for appending
-        print('', end="", file=f)  #
 
     has = set()
     prCandidate_list = []
-    # if os.path.exists(candidatePR_input_file):
-    #     if not add_flag:
-    #         raise Exception('file already exists!')
-    #     with open(candidatePR_input_file) as f:
-    #         for t in f.readlines():
-    #             r, n = t.strip().split()
-    #             has.add((r, n))
-    #     print("length : " + str(len(has)))
-    #     return has
+    flag_checkedPRListToday = False
+
+    #get last modification time
+    modTimesinceEpoc = os.path.getmtime(candidatePR_input_file)
+    # Convert seconds since epoch to readable timestamp
+    modificationTime = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(modTimesinceEpoc))
+    # get date for today, if the pr was created 1 yr ago, then stop
+    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    print(str(util.timeUtil.days_between_noTZ(modificationTime, now ))+"days")
+    if (util.timeUtil.days_between_noTZ(modificationTime, now)==0):
+        flag_checkedPRListToday = True
+        print("today's PR checked.")
+
+    if os.path.exists(candidatePR_input_file) and flag_checkedPRListToday:
+
+        if not add_flag:
+            raise Exception('file already exists!')
+        with open(candidatePR_input_file) as f:
+            for t in f.readlines():
+                r, n = t.strip().split()
+                has.add((r, n))
+        print("length : " + str(len(has)))
+        return has
+
+    with open(candidatePR_input_file, 'w') as f:  # opens file for appending
+        print('', end="", file=f)  #
 
     # get all pr
     pull_list = get_repo_info(repo, 'pull', renew=True)  # get all info about all PRs, sort by ID
@@ -58,7 +73,6 @@ def getCandidatePRs(repo):
         current_pr_createdAt = current_pr['created_at']
 
         # get date for today, if the pr was created 1 yr ago, then stop
-        now = datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
         if (current_pr['state'] == 'closed'):
             #             print("closed pr " + str(current_pr_id))
             continue
