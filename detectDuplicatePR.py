@@ -1,7 +1,7 @@
 # import nltk
 # nltk.download()
 from git import *
-
+import json
 import init
 import util.timeUtil
 import datetime
@@ -133,6 +133,8 @@ def exeEveryDay():
     secs = delta_t.seconds + 1
     t = Timer(secs, work)
     t.start()
+
+
 
 
 if __name__ == "__main__":

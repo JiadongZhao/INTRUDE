@@ -5,6 +5,7 @@ import json
 import logging
 from typing import Iterable
 from random import randint
+import init
 
 try:
     import settings
@@ -165,6 +166,76 @@ class GitHubAPI(object):
                 "No GitHub API tokens found in settings.py. Please add some.")
         self.tokens = [GitHubAPIToken(t, timeout=timeout) for t in tokens]
 
+    def requestPR(self, url, method='get', page=1, data=None, **params):
+        # type: (str, str, bool, str) -> dict
+        """ Generic, API version agnostic request method """
+        timeout_counter = 0
+        params['page'] = page
+        params['per_page'] = init.numPRperPage
+        while True:
+            for token in self.tokens:
+                # for token in sorted(self.tokens, key=lambda t: t.when(url)):
+                if not token.ready(url):
+                    continue
+
+                try:
+                    r = token.request(url, method=method, data=data, **params)
+                    print(r.url)
+                except requests.ConnectionError:
+                    print('except requests.ConnectionError')
+                    continue
+                except TokenNotReady:
+                    continue
+                except requests.exceptions.Timeout:
+                    timeout_counter += 1
+                    if timeout_counter > len(self.tokens):
+                        raise
+                    continue  # i.e. try again
+
+                if r.status_code in (404, 451):
+                    print("404, 451 retry..")
+                    return {}
+                    # API v3 only
+                    # raise RepoDoesNotExist(
+                    #     "GH API returned status %s" % r.status_code)
+                elif r.status_code == 409:
+                    print("409 retry..")
+                    # repository is empty https://developer.github.com/v3/git/
+                    return {}
+                elif r.status_code == 410:
+                    print("410 retry..")
+                    # repository is empty https://developer.github.com/v3/git/
+                    return {}
+                elif r.status_code == 401:
+                    print("401,Bad credentials, please remove this token")
+                    continue
+                elif r.status_code == 403:
+                    # repository is empty https://developer.github.com/v3/git/
+                    print("403 retry..")
+                    time.sleep(randint(1, 60))
+                    continue
+                elif r.status_code == 443:
+                    # repository is empty https://developer.github.com/v3/git/
+                    print("443 retry..")
+                    time.sleep(randint(1, 29))
+                    continue
+                elif r.status_code == 502:
+                    # repository is empty https://developer.github.com/v3/git/
+                    print("443 retry..")
+                    time.sleep(randint(1, 29))
+                    continue
+                r.raise_for_status()
+                res = r.json()
+                return res
+
+            next_res = min(token.when(url) for token in self.tokens)
+            sleep = int(next_res - time.time()) + 1
+            if sleep > 0:
+                logger.info(
+                    "%s: out of keys, resuming in %d minutes, %d seconds",
+                    datetime.now().strftime("%H:%M"), *divmod(sleep, 60))
+                time.sleep(sleep)
+                logger.info(".. resumed")
     def request(self, url, method='get', paginate=False, data=None, **params):
         # type: (str, str, bool, str) -> dict
         """ Generic, API version agnostic request method """

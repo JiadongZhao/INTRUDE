@@ -15,7 +15,7 @@ import scraper
 from util import localfile
 from random import randint
 import logging
-
+import json
 logger = logging.getLogger('INTRUDE.scraper')
 
 # app = Flask(__name__)
@@ -193,6 +193,8 @@ def fetch_pr_info(pull, must_in_local=False):
 # -------------------About Repo--------------------------------------------------------
 
 def get_repo_info(repo, type, renew):
+    old_openPR_list, latest_pr = getOldOpenPRs(repo)
+
     save_path = LOCAL_DATA_PATH + '/pr_data/' + repo + '/%s_list.json' % type
     if type == 'fork':
         save_path = LOCAL_DATA_PATH + '/result/' + repo + '/forks_list.json'
@@ -205,7 +207,10 @@ def get_repo_info(repo, type, renew):
 
     print('start fetch new list for ', repo, type)
     if (type == 'pull') or (type == 'issue'):
-        ret = api.request('repos/%s/%ss' % (repo, type), state='all', paginate= True)
+        page_index = 1
+        while(True):
+            ret = api.requestPR('repos/%s/%ss' % (repo, type), state='all', page=page_index)
+            print('')
     else:
         if type == 'branch':
             type = 'branche'
@@ -437,6 +442,20 @@ def request(self, url, method='get', paginate=False, data=None, **params):
             time.sleep(sleep)
             logger.info(".. resumed")
 
+def getOldOpenPRs(repo):
+    old_openPR_list = []
+
+    file = init.local_pr_data_dir + repo + '/pull_list.json'
+    latest_pr = 0
+    with open(file) as json_file:
+        data = json.load(json_file)
+        latest_pr = data[0]['number']
+        for pr in data:
+            number = pr['number']
+            state = pr['state']
+            if (state == 'open'):
+                old_openPR_list.append(number)
+    return old_openPR_list, latest_pr
 
 if __name__ == "__main__":
     # r = get_pull('angular/angular.js', '16629', 1)
