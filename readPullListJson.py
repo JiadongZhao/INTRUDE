@@ -28,9 +28,10 @@ def getOldOpenPRs(repo):
             state = pr['state']
             created_at = pr['created_at']
             if (state == 'open'):
-                if (util.timeUtil.days_between(created_at, now) < 2 * 365):
+                if (util.timeUtil.days_between(created_at, now) < 3):
                     old_openPR_list.append(number)
-        if len(old_openPR_list) > 0:
+        minID = min(old_openPR_list)
+        if len(old_openPR_list) > 0 and minID < latest_pr:
             return min(old_openPR_list)
         else:
             return latest_pr
@@ -40,7 +41,7 @@ def getOldOpenPRs(repo):
 #     write_file.write()
 
 
-def get_repo_info(repo, type, renew):
+def get_repo_info_forPR(repo, type, renew):
     filtered_result = []
 
     tocheck_pr = getOldOpenPRs(repo)
@@ -62,15 +63,16 @@ def get_repo_info(repo, type, renew):
             ret = api.requestPR('repos/%s/%ss' % (repo, type), state='all', page=page_index)
             numPR = init.numPRperPage
             for pr in ret:
-                if (pr['number'] >= tocheck_pr):
+                # if (pr['number'] >= tocheck_pr):
+                if (pr['number'] > tocheck_pr):
                     filtered_result.append(pr)
                 else:
                     print('get all ' + str(len(filtered_result)) + ' prs')
-                    localfile.write_to_file(save_path,filtered_result)
+                    localfile.replaceWithNewPRs(save_path,filtered_result)
                     return filtered_result
             if (len(filtered_result) < numPR):
-                print('get all ' + len(filtered_result) + ' prs -- after page ' + page_index)
-                localfile.write_to_file(save_path, filtered_result)
+                print('get all ' + str(len(filtered_result)) + ' prs -- after page ' + str(page_index))
+                localfile.replaceWithNewPRs(save_path, filtered_result)
                 return filtered_result
             else:
                 page_index += 1
@@ -85,4 +87,4 @@ def get_repo_info(repo, type, renew):
 
 
 if __name__ == "__main__":
-    get_repo_info('Idnan/bash-guide', 'pull', True)
+    get_repo_info_forPR('shuiblue/infox', 'pull', True)

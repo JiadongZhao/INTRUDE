@@ -61,7 +61,7 @@ def getCandidatePRs(repo):
         print('', end="", file=f)  #
 
     # get all pr
-    pull_list = get_repo_info(repo, 'pull', renew=True)  # get all info about all PRs, sort by ID
+    pull_list = get_repo_info_forPR(repo, 'pull', renew=True)  # get all info about all PRs, sort by ID
     pull_list = sorted(pull_list, key=lambda x: int(x['number']), reverse=True)
     print("length : " + str(len(pull_list)))
 

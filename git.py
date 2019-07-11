@@ -7,7 +7,7 @@ from datetime import datetime
 
 import fetch_raw_diff
 import init
-
+import util.timeUtil
 # from flask import Flask
 # from flask_github import GitHub
 
@@ -191,9 +191,39 @@ def fetch_pr_info(pull, must_in_local=False):
 
 
 # -------------------About Repo--------------------------------------------------------
+#
+# def get_repo_info(repo, type, renew):
+#     old_openPR_list, latest_pr = getOldOpenPRs(repo)
+#
+#     save_path = LOCAL_DATA_PATH + '/pr_data/' + repo + '/%s_list.json' % type
+#     if type == 'fork':
+#         save_path = LOCAL_DATA_PATH + '/result/' + repo + '/forks_list.json'
+#
+#     if (os.path.exists(save_path)) and (not renew):
+#         try:
+#             return localfile.get_file(save_path)
+#         except:
+#             pass
+#
+#     print('start fetch new list for ', repo, type)
+#     if (type == 'pull') or (type == 'issue'):
+#         page_index = 1
+#         while(True):
+#             ret = api.requestPR('repos/%s/%ss' % (repo, type), state='all', page=page_index)
+#             print('')
+#     else:
+#         if type == 'branch':
+#             type = 'branche'
+#         ret = api.request( 'repos/%s/%ss' % (repo, type), True)
+#
+#     localfile.write_to_file(save_path, ret)
+#     return ret
 
-def get_repo_info(repo, type, renew):
-    old_openPR_list, latest_pr = getOldOpenPRs(repo)
+
+def get_repo_info_forPR(repo, type, renew):
+    filtered_result = []
+
+    tocheck_pr = getOldOpenPRs(repo)
 
     save_path = LOCAL_DATA_PATH + '/pr_data/' + repo + '/%s_list.json' % type
     if type == 'fork':
@@ -208,16 +238,32 @@ def get_repo_info(repo, type, renew):
     print('start fetch new list for ', repo, type)
     if (type == 'pull') or (type == 'issue'):
         page_index = 1
-        while(True):
+        while (True):
             ret = api.requestPR('repos/%s/%ss' % (repo, type), state='all', page=page_index)
-            print('')
+            numPR = init.numPRperPage
+            for pr in ret:
+                # if (pr['number'] >= tocheck_pr):
+                if (pr['number'] > tocheck_pr):
+                    filtered_result.append(pr)
+                else:
+                    print('get all ' + str(len(filtered_result)) + ' prs')
+                    localfile.replaceWithNewPRs(save_path,filtered_result)
+                    return filtered_result
+            if (len(filtered_result) < numPR):
+                print('get all ' + str(len(filtered_result)) + ' prs -- after page ' + str(page_index))
+                localfile.replaceWithNewPRs(save_path, filtered_result)
+                return filtered_result
+            else:
+                page_index += 1
+                numPR += init.numPRperPage
     else:
         if type == 'branch':
             type = 'branche'
-        ret = api.request( 'repos/%s/%ss' % (repo, type), True)
+        ret = api.request('repos/%s/%ss' % (repo, type), True)
 
     localfile.write_to_file(save_path, ret)
     return ret
+
 
 
 def fetch_commit(url, renew=False):
@@ -443,6 +489,8 @@ def request(self, url, method='get', paginate=False, data=None, **params):
             logger.info(".. resumed")
 
 def getOldOpenPRs(repo):
+    now = datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
+
     old_openPR_list = []
 
     file = init.local_pr_data_dir + repo + '/pull_list.json'
@@ -450,12 +498,19 @@ def getOldOpenPRs(repo):
     with open(file) as json_file:
         data = json.load(json_file)
         latest_pr = data[0]['number']
+
         for pr in data:
             number = pr['number']
             state = pr['state']
+            created_at = pr['created_at']
             if (state == 'open'):
-                old_openPR_list.append(number)
-    return old_openPR_list, latest_pr
+                if (util.timeUtil.days_between(created_at, now) < 3):
+                    old_openPR_list.append(number)
+        minID = min(old_openPR_list)
+        if len(old_openPR_list) > 0 and minID < latest_pr:
+            return min(old_openPR_list)
+        else:
+            return latest_pr
 
 if __name__ == "__main__":
     # r = get_pull('angular/angular.js', '16629', 1)
