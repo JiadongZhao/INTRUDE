@@ -1,10 +1,11 @@
 import time
 import os
+import os.path
 import re
 import requests
 import platform
 from datetime import datetime
-
+import pathlib
 import fetch_raw_diff
 import init
 import util.timeUtil
@@ -16,6 +17,7 @@ from util import localfile
 from random import randint
 import logging
 import json
+
 logger = logging.getLogger('INTRUDE.scraper')
 
 # app = Flask(__name__)
@@ -26,7 +28,6 @@ logger = logging.getLogger('INTRUDE.scraper')
 # app.config['GITHUB_AUTH_URL'] = 'https://github.com/login/oauth/'
 
 LOCAL_DATA_PATH = init.LOCAL_DATA_PATH
-
 
 # api = GitHub(app)
 api = scraper.GitHubAPI()
@@ -82,10 +83,10 @@ def check_too_big(pull):
         pull = get_pull(pull["base"]["repo"]["full_name"], pull["number"], True)
 
     if pull["changed_files"] > 50:
-#         print('more than 50 changed files')
+        #         print('more than 50 changed files')
         return True
     if (pull["additions"] >= 10000) or (pull["deletions"] >= 10000):
-#         print('more than 10000 Loc changes')
+        #         print('more than 10000 Loc changes')
         return True
     return False
 
@@ -94,7 +95,7 @@ check_large_cache = {}
 
 
 def check_large(pull):
-#     print ("check_large:" + str(pull['number']))
+    #     print ("check_large:" + str(pull['number']))
     global check_large_cache
     index = (pull["base"]["repo"]["full_name"], pull["number"])
     if index in check_large_cache:
@@ -123,7 +124,7 @@ def check_large(pull):
             return True
     '''
 
-    path = init.LOCAL_DATA_PATH+ '/pr_data/%s/%s/raw_diff.json' % (pull["base"]["repo"]["full_name"], pull["number"])
+    path = init.LOCAL_DATA_PATH + '/pr_data/%s/%s/raw_diff.json' % (pull["base"]["repo"]["full_name"], pull["number"])
     if os.path.exists(path) and (os.path.getsize(path) >= 50 * 1024):
         return True
 
@@ -143,13 +144,13 @@ file_list_cache = {}
 
 
 def fetch_pr_info(pull, must_in_local=False):
-#     print ("fetch_pr_info:" + str(pull['number']))
+    #     print ("fetch_pr_info:" + str(pull['number']))
     global file_list_cache
     ind = (pull["base"]["repo"]["full_name"], pull["number"])
     if ind in file_list_cache:
         return file_list_cache[ind]
 
-    path = LOCAL_DATA_PATH+'/pr_data/%s/%s' % (pull["base"]["repo"]["full_name"], pull["number"])
+    path = LOCAL_DATA_PATH + '/pr_data/%s/%s' % (pull["base"]["repo"]["full_name"], pull["number"])
     parse_diff_path = path + '/parse_diff.json'
     raw_diff_path = path + '/raw_diff.json'
     pull_files_path = path + '/pull_files.json'
@@ -191,7 +192,7 @@ def fetch_pr_info(pull, must_in_local=False):
 
 
 # -------------------About Repo--------------------------------------------------------
-def get_repo_info(repo, type, renew ):
+def get_repo_info(repo, type, renew):
     save_path = LOCAL_DATA_PATH + '/pr_data/' + repo + '/%s_list.json' % type
     if type == 'fork':
         save_path = LOCAL_DATA_PATH + '/result/' + repo + '/forks_list.json'
@@ -204,53 +205,7 @@ def get_repo_info(repo, type, renew ):
 
     print('start fetch new list for ', repo, type)
     if (type == 'pull') or (type == 'issue'):
-        ret = api.request('repos/%s/%ss' % (repo, type), state='all', paginate= True)
-    else:
-        if type == 'branch':
-            type = 'branche'
-        ret = api.request( 'repos/%s/%ss' % (repo, type), True)
-
-    localfile.write_to_file(save_path, ret)
-    return ret
-
-
-
-def get_repo_info_forPR(repo, type, renew):
-    filtered_result = []
-
-    tocheck_pr = getOldOpenPRs(repo)
-
-    save_path = LOCAL_DATA_PATH + '/pr_data/' + repo + '/%s_list.json' % type
-    if type == 'fork':
-        save_path = LOCAL_DATA_PATH + '/result/' + repo + '/forks_list.json'
-
-    if (os.path.exists(save_path)) and (not renew):
-        try:
-            return localfile.get_file(save_path)
-        except:
-            pass
-
-    print('start fetch new list for ', repo, type)
-    if (type == 'pull') or (type == 'issue'):
-        page_index = 1
-        while (True):
-            ret = api.requestPR('repos/%s/%ss' % (repo, type), state='all', page=page_index)
-            numPR = init.numPRperPage
-            for pr in ret:
-                # if (pr['number'] >= tocheck_pr):
-                if (pr['number'] > tocheck_pr):
-                    filtered_result.append(pr)
-                else:
-                    print('get all ' + str(len(filtered_result)) + ' prs')
-                    localfile.replaceWithNewPRs(save_path,filtered_result)
-                    return filtered_result
-            if (len(filtered_result) < numPR):
-                print('get all ' + str(len(filtered_result)) + ' prs -- after page ' + str(page_index))
-                localfile.replaceWithNewPRs(save_path, filtered_result)
-                return filtered_result
-            else:
-                page_index += 1
-                numPR += init.numPRperPage
+        ret = api.request('repos/%s/%ss' % (repo, type), state='all', paginate=True)
     else:
         if type == 'branch':
             type = 'branche'
@@ -259,6 +214,55 @@ def get_repo_info_forPR(repo, type, renew):
     localfile.write_to_file(save_path, ret)
     return ret
 
+
+def get_repo_info_forPR(repo, type, renew):
+    filtered_result = []
+
+    pullListfile = pathlib.Path(init.local_pr_data_dir + repo + '/pull_list.json')
+    if pullListfile.exists():
+        tocheck_pr = getOldOpenPRs(repo)
+
+        save_path = LOCAL_DATA_PATH + '/pr_data/' + repo + '/%s_list.json' % type
+        if type == 'fork':
+            save_path = LOCAL_DATA_PATH + '/result/' + repo + '/forks_list.json'
+
+        if (os.path.exists(save_path)) and (not renew):
+            try:
+                return localfile.get_file(save_path)
+            except:
+                pass
+
+        print('start fetch new list for ', repo, type)
+        if (type == 'pull') or (type == 'issue'):
+            page_index = 1
+            while (True):
+                ret = api.requestPR('repos/%s/%ss' % (repo, type), state='all', page=page_index)
+                numPR = init.numPRperPage
+                for pr in ret:
+                    # if (pr['number'] >= tocheck_pr):
+                    if (pr['number'] > tocheck_pr):
+                        filtered_result.append(pr)
+                    else:
+                        print('get all ' + str(len(filtered_result)) + ' prs')
+                        localfile.replaceWithNewPRs(save_path, filtered_result)
+                        return filtered_result
+                if (len(filtered_result) < numPR):
+                    print('get all ' + str(len(filtered_result)) + ' prs -- after page ' + str(page_index))
+                    localfile.replaceWithNewPRs(save_path, filtered_result)
+                    return filtered_result
+                else:
+                    page_index += 1
+                    numPR += init.numPRperPage
+        else:
+            if type == 'branch':
+                type = 'branche'
+            ret = api.request('repos/%s/%ss' % (repo, type), True)
+
+        localfile.write_to_file(save_path, ret)
+    else:
+        print('pull list does not exist, get from scratch')
+        ret = get_repo_info(repo, type, renew)
+    return ret
 
 
 def fetch_commit(url, renew=False):
@@ -302,9 +306,9 @@ def get_pull_commit(pull, renew=False):
             return localfile.get_file(save_path)
         except:
             pass
-#     commits = api.request(pull['commits_url'].replace('https://api.github.com/', ''), True)
-    
-    commits= api.request(pull['commits_url'].replace('https://api.github.com/', paginate=True, state='all'))
+    #     commits = api.request(pull['commits_url'].replace('https://api.github.com/', ''), True)
+
+    commits = api.request(pull['commits_url'].replace('https://api.github.com/', paginate=True, state='all'))
     time.sleep(0.7)
     localfile.write_to_file(save_path, commits)
     return commits
@@ -319,7 +323,7 @@ def get_another_pull(pull, renew=False):
         except:
             pass
 
-    comments_href = pull["_links"]["comments"]["href"]  #found cites in comments, but checking events is easier.
+    comments_href = pull["_links"]["comments"]["href"]  # found cites in comments, but checking events is easier.
     comments = api.request(comments_href, True)
     time.sleep(0.7)
     candidates = []
@@ -349,7 +353,7 @@ def fetch_file_list(pull, renew=False):
     if len(t) > 0:
         raise Exception('too big', pull['html_url'])
     else:
-        li = api.request( 'repos/%s/pulls/%s/files' % (repo, num), paginate=True)
+        li = api.request('repos/%s/pulls/%s/files' % (repo, num), paginate=True)
         # li = api.request( 'repos/%s/pulls/%s/files' % (repo, num), True)
         time.sleep(0.8)
         for f in li:
@@ -483,6 +487,7 @@ def request(self, url, method='get', paginate=False, data=None, **params):
             time.sleep(sleep)
             logger.info(".. resumed")
 
+
 def getOldOpenPRs(repo):
     now = datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
 
@@ -502,12 +507,13 @@ def getOldOpenPRs(repo):
                 if (util.timeUtil.days_between(created_at, now) < 3):
                     old_openPR_list.append(number)
 
-        if len(old_openPR_list) > 0 :
+        if len(old_openPR_list) > 0:
             minID = min(old_openPR_list)
             if minID < latest_pr:
                 return min(old_openPR_list)
         else:
             return latest_pr
+
 
 if __name__ == "__main__":
     # r = get_pull('angular/angular.js', '16629', 1)
@@ -518,11 +524,11 @@ if __name__ == "__main__":
     api.request("repos/jquery/jquery/pulls/4406/commits")
     api.request("repos/jquery/jquery/pulls/4406/commits")
 #     get_pull_commit('jquery/jquery', '4379', True)
-    # print(len(get_repo_info('FancyCoder0/INFOX', 'pull', True)))
-    # print(len(get_repo_info('FancyCoder0/INFOX', 'issue', True)))
-    # print(len(get_repo_info('FancyCoder0/INFOX', 'commit', True)))
-    # print(len(get_repo_info('tensorflow/tensorflow', 'branch', True)))
-    #
-    # print(len(fetch_file_list(get_pull('FancyCoder0/INFOX', '113', True))))
-    # print(get_another_pull(get_pull('facebook/react', '12503'), True))
-    # print([x['commit']['message'] for x in get_pull_commit(get_pull('facebook/react', '12503'), True)])
+# print(len(get_repo_info('FancyCoder0/INFOX', 'pull', True)))
+# print(len(get_repo_info('FancyCoder0/INFOX', 'issue', True)))
+# print(len(get_repo_info('FancyCoder0/INFOX', 'commit', True)))
+# print(len(get_repo_info('tensorflow/tensorflow', 'branch', True)))
+#
+# print(len(fetch_file_list(get_pull('FancyCoder0/INFOX', '113', True))))
+# print(get_another_pull(get_pull('facebook/react', '12503'), True))
+# print([x['commit']['message'] for x in get_pull_commit(get_pull('facebook/react', '12503'), True)])

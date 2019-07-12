@@ -7,8 +7,15 @@ from datetime import datetime, timedelta
 from clf import *
 from git import *
 from comp import *
+import os
+import os.path
 
-c = classify()
+if not path.exists(init.model_saved_path):
+    print('retrain the model')
+    c = classify()
+else:
+    print('load existing model')
+    c = joblib.load(init.model_saved_path)
 
 cite = {}
 renew_pr_list_flag = False
