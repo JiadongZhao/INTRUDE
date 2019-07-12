@@ -501,9 +501,11 @@ def getOldOpenPRs(repo):
             if (state == 'open'):
                 if (util.timeUtil.days_between(created_at, now) < 3):
                     old_openPR_list.append(number)
-        minID = min(old_openPR_list)
-        if len(old_openPR_list) > 0 and minID < latest_pr:
-            return min(old_openPR_list)
+
+        if len(old_openPR_list) > 0 :
+            minID = min(old_openPR_list)
+            if minID < latest_pr:
+                return min(old_openPR_list)
         else:
             return latest_pr
 

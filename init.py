@@ -22,7 +22,7 @@ else:
     dupPR_result_filePath_prefix = LOCAL_DATA_PATH + '/dupPR/'
     local_pr_data_dir = LOCAL_DATA_PATH + '/pr_data/'
     numPRperPage = 100
-
+    model_saved_path = LOCAL_DATA_PATH + '/INTRUDE_classifier/saved_model.pkl'
 
 pr_date_difference_inDays= 2
 

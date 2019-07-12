@@ -13,6 +13,7 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.utils import shuffle
 from sklearn import svm
 from sklearn import linear_model
+from sklearn.externals import joblib
 from sklearn.feature_selection import SelectKBest, f_regression
 from sklearn.pipeline import make_pipeline
 from sklearn.model_selection import train_test_split
@@ -28,6 +29,8 @@ from util import localfile
 
 from comp import *
 from git import *
+import os.path
+from os import path
 
 # ----------------INPUT & CONFIG------------------------------------
 
@@ -63,8 +66,8 @@ if add_conf:
 
 part_params = None
 
-draw_pic = True # draw PR curve
-draw_roc = True # draw ROC curve
+draw_pic = False # draw PR curve
+draw_roc = False # draw ROC curve
 model_data_random_shuffle_flag = False
 model_data_renew_flag = False
 
@@ -258,7 +261,7 @@ def classify(model_type=default_model):
                 X_train_new.append(X_train[i])
                 y_train_new.append(y_train[i])
 
-    X_train, y_train = X_train_new, y_train_new
+    X_train, y_train = X_train_new,  y_train_new
     '''
 
     if part_params:
@@ -402,10 +405,17 @@ def classify(model_type=default_model):
 
     #clf = clf.fit(X_train_new, y_train_new)
 
+    # save the model to disk
 
-
-
+    joblib.dump(model, init.model_saved_path)
     return clf
 
 if __name__ == "__main__":
-    classify()
+
+    if not path.exists(init.model_saved_path):
+        print('retrain the model')
+        classify()
+    else:
+        print('load existing model')
+        # Load the pickle file
+        clf_load = joblib.load(init.model_saved_path)
