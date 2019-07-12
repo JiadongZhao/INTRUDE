@@ -328,14 +328,14 @@ def classify(model_type=default_model):
 
                 print(acc, average_precision, f1_s, sep='\t')
 
-                # joblib.dump(clf, init.model_saved_path)
-                # # joblib.dump(clf, 'filename.pkl')
-                # print('load existing model')
-                # # clf_load = joblib.load('filename.pkl')
-                # clf_load = joblib.load(init.model_saved_path)
-                #
-                # # Check that the loaded model is the same as the original
-                # print(clf_load.score(X_test, y_test))
+                joblib.dump(clf, init.model_saved_path)
+                # joblib.dump(clf, 'filename.pkl')
+                print('load existing model')
+                # clf_load = joblib.load('filename.pkl')
+                clf_load = joblib.load(init.model_saved_path)
+
+                # Check that the loaded model is the same as the original
+                print(clf_load.score(X_test, y_test))
 
                 if draw_pic:
                     # draw the PR-curve
