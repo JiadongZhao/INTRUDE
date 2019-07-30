@@ -53,7 +53,7 @@ def getCandidatePRs(repo):
             print("today's PR checked.")
             with open(candidatePR_input_file) as f:
                 for t in f.readlines():
-                    r, n,created_at = t.strip().split()
+                    r, n, created_at = t.strip().split()
                     has.add((r, n))
             print("length : " + str(len(has)))
             return has
@@ -136,8 +136,6 @@ def exeEveryDay():
     t.start()
 
 
-
-
 if __name__ == "__main__":
-    #     exeEveryDay()
-    work()
+    exeEveryDay()
+# work()
