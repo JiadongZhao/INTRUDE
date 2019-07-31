@@ -125,7 +125,7 @@ def work():
 
 
 
-schedule.every().day.at("12:35").do(work, 'It is 12:50')
+schedule.every().day.at("13:15").do(work, 'It is 13:15')
 # schedule.every().day.at("12:36").do(work, 'It is 12:38')
 
 while True:
