@@ -5,9 +5,10 @@ import json
 import init
 import util.timeUtil
 import datetime
-
+import schedule
+import time
 import detect
-from datetime import datetime
+from datetime import datetime, timedelta
 from threading import Timer
 
 detect.speed_up = True
@@ -92,6 +93,9 @@ def getCandidatePRs(repo):
 
 
 def work():
+    x = datetime.today()
+    today_str = str(x).split(" ")[0] + "_test"
+    print('today : ' + today_str)
     cnt = 0
     for repo in init.repos:
         print("get open PRs from repo: " + repo)
@@ -120,22 +124,10 @@ def work():
             continue
 
 
-today = ''
 
+schedule.every().day.at("12:35").do(work, 'It is 12:50')
+# schedule.every().day.at("12:36").do(work, 'It is 12:38')
 
-def exeEveryDay():
-    x = datetime.today()
-    today_str = str(x).split(" ")[0]+"_test"
-    print('today : ' + today_str)
-
-    y = x.replace(day=x.day + 1, hour=15, minute=0, second=0, microsecond=0)
-
-    delta_t = y - x
-    secs = delta_t.seconds + 1
-    t = Timer(secs, work)
-    t.start()
-
-
-if __name__ == "__main__":
-    exeEveryDay()
-# work()
+while True:
+    schedule.run_pending()
+    time.sleep(60)
