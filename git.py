@@ -497,22 +497,23 @@ def getOldOpenPRs(repo):
     latest_pr = 0
     with open(file) as json_file:
         data = json.load(json_file)
-        latest_pr = data[0]['number']
+        if(len(data)>0):
+            latest_pr = data[0]['number']
 
-        for pr in data:
-            number = pr['number']
-            state = pr['state']
-            created_at = pr['created_at']
-            if (state == 'open'):
-                if (util.timeUtil.days_between(created_at, now) < 3):
-                    old_openPR_list.append(number)
+            for pr in data:
+                number = pr['number']
+                state = pr['state']
+                created_at = pr['created_at']
+                if (state == 'open'):
+                    if (util.timeUtil.days_between(created_at, now) < 3):
+                        old_openPR_list.append(number)
 
-        if len(old_openPR_list) > 0:
-            minID = min(old_openPR_list)
-            if minID < latest_pr:
-                return min(old_openPR_list)
-        else:
-            return latest_pr
+            if len(old_openPR_list) > 0:
+                minID = min(old_openPR_list)
+                if minID < latest_pr:
+                    return min(old_openPR_list)
+            else:
+                return latest_pr
 
 
 if __name__ == "__main__":
