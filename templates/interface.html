@@ -1,0 +1,229 @@
+
+<html>
+<body>
+    <!-- links to other page -->
+    {% if id == "home" %}
+    <a href="/rejects">Rejected</a>
+    {% else %}
+    <a href="/">Home</a>
+    {% endif %}
+    <p>
+      <form method=POST action="{{ url_for('update_db') }}">
+        <button>Update</button>
+      </form>
+    <p><p>
+      <!-- show/hide additional pairs buttons -->
+      {% if id == "home" %}
+      <form method=POST action="{{ url_for('show_hide_switch') }}">
+        <button type="submit" value="hide" name="show_hide_button">Show only one pair per repo</button>
+        <button type="submit" value="show" name="show_hide_button">Show all pairs</button>
+      </form>
+      {% endif %}
+    <p>
+    <!-- table sorting option buttons -->
+    <button onclick="sortTable('score')">Sort by score</button>
+    <button onclick="sortTable('timestamp')">Sort by timestamp</button>
+    <button onclick="sortTable('repo')">Sort by repo</button>
+  <table id='tbl' border=1 width="140%">
+    <!-- headings -->
+    <tr>
+      <th width="10%">repo</th>
+      <th width="15%">Timestamp</th>
+      <th width="5%">pr1</th>
+      <th width="5%">pr2</th>
+      <th width="10%">Score</th>
+      <th width="15%">Send comment?</th>
+      <th width="20%">Notes</th>
+      <th width="5%">title</th>
+      <th width="5%">description</th>
+      <th width="5%">patch content</th>
+      <th width="5%">patch content overlap</th>
+      <th width="5%">changed file</th>
+      <th width="5%">changed file overlap</th>
+      <th width="5%">location</th>
+      <th width="5%">location overlap</th>
+      <th width="5%">issue number</th>
+      <th width="5%">commit message</th>
+    </tr>
+    <!-- loop through rows (top pr pairs), showing db as a table on page -->
+    {% for row in data %}
+    <tr>
+      <!-- repo name, links to repo page -->
+      <td><a href="https://github.com/{{row[1]}}">{{row[1]}}</a></td>
+      <!-- date/timestamp -->
+      <td>{{row[21]}}</td>
+      <!-- PR #1, links to PR1 page -->
+      <td><a href="https://github.com/{{row[1]}}/pull/{{row[2]}}">{{row[2]}}<a/></td>
+      <!-- PR #2, links to PR2 page -->
+      <td><a href="https://github.com/{{row[1]}}/pull/{{row[3]}}">{{row[3]}}<a/></td>
+      <!-- similarity score -->
+      <td>{{row[4]}}</td>
+      <!-- send/don't send comment buttons -->
+      <td>
+        {% if id == "home" %}
+          {% if row[15] == 0 %}
+          <form method=POST action="{{ url_for('send_comment') }}">
+            <button value="{{row[0]}}" name="send_comment_button">Send comment</button>
+            <p>
+          </form>
+          <form method=POST action="{{ url_for('no_send_comment') }}">
+            <button value="{{row[0]}}" name="no_send_comment_button">Don't send comment</button>
+          </form>
+          {% elif row[15] == 1 %}
+          Comment sent.
+          {% endif %}
+        {% else %}
+          <form method=POST action="{{ url_for('reset_send_comment') }}">
+            <button value="{{row[0]}}" name="reset_button">Reset</button>
+          </form>
+        {% endif %}
+      </td>
+      <!-- note box, save button -->
+      <td>
+        <form method=POST action="{{ url_for('notes') }}">
+          <!-- if there are not yet any notes, display filler -->
+          <!-- else (if there are already notes), display them -->
+          <textarea rows="4" width="100%" name="notebox">{% if row[16] == None %}Input notes here...
+          {% else %}{{row[16]}}
+          {% endif %}
+          </textarea>
+          <button value="{{row[1]}}" name="save_button">Save</button>
+        </form>
+      </td>
+      <!-- FEATURE SCORE LIST -->
+      <!-- title -->
+      <td>{{row[5]}}</td>
+      <!-- description -->
+      <td>{{row[6]}}</td>
+      <!-- patch content -->
+      <td>{{row[7]}}</td>
+      <!-- patch content overlap -->
+      <td>{{row[8]}}</td>
+      <!-- changed file -->
+      <td>{{row[9]}}</td>
+      <!-- changed file overlap -->
+      <td>{{row[10]}}</td>
+      <!-- location -->
+      <td>{{row[11]}}</td>
+      <!-- location overlap -->
+      <td>{{row[12]}}</td>
+      <!-- issue number -->
+      <td>{{row[13]}}</td>
+      <!-- commit message -->
+      <td>{{row[14]}}</td>
+      <!-- END FEATURE SCORE LIST -->
+    </tr>
+    {% endfor %}
+    <!-- list non-top-pairs, if "show" -->
+    {% for row in data_dups %}
+    <tr>
+      <!-- repo name, links to repo page -->
+      <td><a href="https://github.com/{{row[1]}}">{{row[1]}}</a></td>
+      <!-- date/timestamp -->
+      <td>{{row[21]}}</td>
+      <!-- PR #1, links to PR1 page -->
+      <td><a href="https://github.com/{{row[1]}}/pull/{{row[2]}}">{{row[2]}}<a/></td>
+      <!-- PR #2, links to PR2 page -->
+      <td><a href="https://github.com/{{row[1]}}/pull/{{row[3]}}">{{row[3]}}<a/></td>
+      <!-- similarity score -->
+      <td>{{row[4]}}</td>
+      <!-- send/don't send comment buttons -->
+      <td>
+        {% if row[20] == 2 %}
+        Comment already sent to this repo.
+        {% elif row[20] == 0 %}
+        There is already a pair from this repo.
+        <p>
+        <form method=POST action="{{ url_for('change_toppair')}}">
+          <button value="{{row[0]}}" name="move">Choose this one instead</button>
+        </form>
+        {% endif %}
+      </td>
+      <!-- note box, save button -->
+      <td>
+        <form method=POST action="{{ url_for('notes') }}">
+          <!-- if there are not yet any notes, display filler -->
+          <!-- else (if there are already notes), display them -->
+          <textarea rows="4" width="100%" name="notebox">{% if row[16] == None %}Input notes here...
+          {% else %}{{row[16]}}
+          {% endif %}
+          </textarea>
+          <button value="{{row[1]}}" name="save_button">Save</button>
+        </form>
+      </td>
+      <!-- FEATURE SCORE LIST -->
+      <!-- title -->
+      <td>{{row[5]}}</td>
+      <!-- description -->
+      <td>{{row[6]}}</td>
+      <!-- patch content -->
+      <td>{{row[7]}}</td>
+      <!-- patch content overlap -->
+      <td>{{row[8]}}</td>
+      <!-- changed file -->
+      <td>{{row[9]}}</td>
+      <!-- changed file overlap -->
+      <td>{{row[10]}}</td>
+      <!-- location -->
+      <td>{{row[11]}}</td>
+      <!-- location overlap -->
+      <td>{{row[12]}}</td>
+      <!-- issue number -->
+      <td>{{row[13]}}</td>
+      <!-- commit message -->
+      <td>{{row[14]}}</td>
+      <!-- END FEATURE SCORE LIST -->
+    </tr>
+    {% endfor %}
+  </table>
+
+  <!-- function to sort the table by column -->
+  <script>
+    function sortTable(sort_by) {
+      var table, rows, switching, i, x, y, n, shouldSwitch, dir, switchcount = 0;
+      if(sort_by == "score"){n = 4;}                // sort by sim. score
+        else if (sort_by == "timestamp") {n = 1;}   // sort by timestamp
+        else{ n = 0; }                              // sort by repo
+      if(n == 0){dir = "asc";}
+        else{dir = "desc";}
+      table = document.getElementById("tbl");
+      switching = true;
+      // loop until no switching has been done:
+      while (switching) {
+        // start by saying: no switching is done:
+        switching = false;
+        rows = table.rows;
+        // loop through table rows (except headers):
+        for (i = 1; i < (rows.length - 1); i++) {
+          // start by saying there should be no switching:
+          shouldSwitch = false;
+          // get the two elements you want to compare, one from current row and one from the next:
+          x = rows[i].getElementsByTagName("TD")[n];
+          y = rows[i + 1].getElementsByTagName("TD")[n];
+          // check if the two rows should switch place, based on the direction, asc or desc:
+          if (dir == "asc") {
+            if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+              // if so, mark as a switch and break the loop:
+              shouldSwitch= true;
+              break;
+            }
+          } else {
+            if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+              // if so, mark as a switch and break the loop:
+              shouldSwitch = true;
+              break;
+            }
+          }
+        }
+        if (shouldSwitch) {
+          // if a switch has been marked, switch and mark that it's been done:
+          rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+          switching = true;
+          // each time a switch is done, increase this count by 1:
+          switchcount ++;
+        }
+      }
+    }
+</script>
+</body>
+</html>
