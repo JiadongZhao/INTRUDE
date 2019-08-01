@@ -125,7 +125,7 @@ def work():
 
 
 def execute():
-    schedule.every().day.at("11:25").do(work)
+    schedule.every().day.at("11:28").do(work)
 
     while True:
         schedule.run_pending()
