@@ -102,6 +102,8 @@ def work():
         getCandidatePRs(repo)
 
         candidatePR_input_file = init.PR_candidate_List_filePath_prefix + repo.replace('/', '.') + '.txt'
+        detection_result_file = init.dupPR_result_filePath_prefix + '/' + today_str + '/' + repo.replace('/',
+                                                                                                         '.') + '.txt'
         try:
             with open(candidatePR_input_file) as f:
                 for t in f.readlines():
@@ -112,9 +114,7 @@ def work():
                     cnt += 1
                     dupPR_id, similarity, feature_vector = detect.detect_one(repo, pr_id)
                     if (dupPR_id == -1 and similarity == -1 and feature_vector == -1): continue
-                    with open(
-                            init.dupPR_result_filePath_prefix + '/' + today_str + '/' + repo.replace('/', '.') + '.txt',
-                            'a') as outf:
+                    with open(detection_result_file, 'a') as outf:
                         print(repo, str(pr_id), str(dupPR_id), "%.4f" % similarity)
                         print("\t".join(
                             [repo, str(pr_id), created_at,
@@ -123,13 +123,15 @@ def work():
             print("file not exist, continue")
             continue
 
+<<<<<<< HEAD
 schedule.every().day.at("10:50").do(work)
 # schedule.every().day.at("12:36").do(work, 'It is 12:38')
+=======
+schedule.every().day.at("13:20").do(work)
+
+
+>>>>>>> 237a1cde9182d7f10b6aeb12eb5ca656a0ebea56
 
 while True:
     schedule.run_pending()
     time.sleep(60)
-
-
-
-

@@ -238,21 +238,24 @@ def get_repo_info_forPR(repo, type, renew):
             while (True):
                 ret = api.requestPR('repos/%s/%ss' % (repo, type), state='all', page=page_index)
                 numPR = init.numPRperPage
-                for pr in ret:
-                    # if (pr['number'] >= tocheck_pr):
-                    if (pr['number'] > tocheck_pr):
-                        filtered_result.append(pr)
-                    else:
-                        print('get all ' + str(len(filtered_result)) + ' prs')
+                if (len(ret)>0):
+                    for pr in ret:
+                        # if (pr['number'] >= tocheck_pr):
+                        if (pr['number'] > tocheck_pr):
+                            filtered_result.append(pr)
+                        else:
+                            print('get all ' + str(len(filtered_result)) + ' prs')
+                            localfile.replaceWithNewPRs(save_path, filtered_result)
+                            return filtered_result
+                    if (len(filtered_result) < numPR):
+                        print('get all ' + str(len(filtered_result)) + ' prs -- after page ' + str(page_index))
                         localfile.replaceWithNewPRs(save_path, filtered_result)
                         return filtered_result
-                if (len(filtered_result) < numPR):
-                    print('get all ' + str(len(filtered_result)) + ' prs -- after page ' + str(page_index))
-                    localfile.replaceWithNewPRs(save_path, filtered_result)
-                    return filtered_result
+                    else:
+                        page_index += 1
+                        numPR += init.numPRperPage
                 else:
-                    page_index += 1
-                    numPR += init.numPRperPage
+                    print("get pulls failed")
         else:
             if type == 'branch':
                 type = 'branche'
@@ -497,22 +500,23 @@ def getOldOpenPRs(repo):
     latest_pr = 0
     with open(file) as json_file:
         data = json.load(json_file)
-        latest_pr = data[0]['number']
+        if(len(data)>0):
+            latest_pr = data[0]['number']
 
-        for pr in data:
-            number = pr['number']
-            state = pr['state']
-            created_at = pr['created_at']
-            if (state == 'open'):
-                if (util.timeUtil.days_between(created_at, now) < 3):
-                    old_openPR_list.append(number)
+            for pr in data:
+                number = pr['number']
+                state = pr['state']
+                created_at = pr['created_at']
+                if (state == 'open'):
+                    if (util.timeUtil.days_between(created_at, now) < 3):
+                        old_openPR_list.append(number)
 
-        if len(old_openPR_list) > 0:
-            minID = min(old_openPR_list)
-            if minID < latest_pr:
-                return min(old_openPR_list)
-        else:
-            return latest_pr
+            if len(old_openPR_list) > 0:
+                minID = min(old_openPR_list)
+                if minID < latest_pr:
+                    return min(old_openPR_list)
+            else:
+                return latest_pr
 
 
 if __name__ == "__main__":
