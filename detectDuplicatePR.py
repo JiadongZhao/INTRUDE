@@ -94,16 +94,23 @@ def getCandidatePRs(repo):
 
 def work():
     x = datetime.today()
-    today_str = str(x).split(" ")[0] + "_test"
+    today_str = str(x).split(" ")[0]
     print('today : ' + today_str)
+
+    output_dir = init.dupPR_result_filePath_prefix + '/' + today_str + '/'
+    if not os.path.exists(output_dir):
+        os.mkdir(output_dir)
+        print("Directory ", output_dir, " Created ")
+    else:
+        print("Directory ", output_dir, " already exists")
+
     cnt = 0
     for repo in init.repos:
         print("get open PRs from repo: " + repo)
         getCandidatePRs(repo)
 
         candidatePR_input_file = init.PR_candidate_List_filePath_prefix + repo.replace('/', '.') + '.txt'
-        detection_result_file = init.dupPR_result_filePath_prefix + '/' + today_str + '/' + repo.replace('/',
-                                                                                                         '.') + '.txt'
+        detection_result_file = output_dir + repo.replace('/', '.') + '.txt'
         try:
             with open(candidatePR_input_file) as f:
                 for t in f.readlines():
@@ -125,12 +132,11 @@ def work():
 
 
 def execute():
-    schedule.every().day.at("11:28").do(work)
+    schedule.every().day.at("11:36").do(work)
 
     while True:
         schedule.run_pending()
         time.sleep(60)
-
 
 
 if __name__ == "__main__":
