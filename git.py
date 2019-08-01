@@ -238,21 +238,24 @@ def get_repo_info_forPR(repo, type, renew):
             while (True):
                 ret = api.requestPR('repos/%s/%ss' % (repo, type), state='all', page=page_index)
                 numPR = init.numPRperPage
-                for pr in ret:
-                    # if (pr['number'] >= tocheck_pr):
-                    if (pr['number'] > tocheck_pr):
-                        filtered_result.append(pr)
-                    else:
-                        print('get all ' + str(len(filtered_result)) + ' prs')
+                if (len(ret)>0):
+                    for pr in ret:
+                        # if (pr['number'] >= tocheck_pr):
+                        if (pr['number'] > tocheck_pr):
+                            filtered_result.append(pr)
+                        else:
+                            print('get all ' + str(len(filtered_result)) + ' prs')
+                            localfile.replaceWithNewPRs(save_path, filtered_result)
+                            return filtered_result
+                    if (len(filtered_result) < numPR):
+                        print('get all ' + str(len(filtered_result)) + ' prs -- after page ' + str(page_index))
                         localfile.replaceWithNewPRs(save_path, filtered_result)
                         return filtered_result
-                if (len(filtered_result) < numPR):
-                    print('get all ' + str(len(filtered_result)) + ' prs -- after page ' + str(page_index))
-                    localfile.replaceWithNewPRs(save_path, filtered_result)
-                    return filtered_result
+                    else:
+                        page_index += 1
+                        numPR += init.numPRperPage
                 else:
-                    page_index += 1
-                    numPR += init.numPRperPage
+                    print("get pulls failed")
         else:
             if type == 'branch':
                 type = 'branche'
