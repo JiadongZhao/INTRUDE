@@ -221,6 +221,7 @@ def get_repo_info_forPR(repo, type, renew):
     pullListfile = pathlib.Path(init.local_pr_data_dir + repo + '/pull_list.json')
     if pullListfile.exists():
         tocheck_pr = getOldOpenPRs(repo)
+        print("tocheck_pr " + tocheck_pr)
 
         save_path = LOCAL_DATA_PATH + '/pr_data/' + repo + '/%s_list.json' % type
         if type == 'fork':
