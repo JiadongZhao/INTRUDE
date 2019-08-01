@@ -123,10 +123,14 @@ def work():
             print("file not exist, continue")
             continue
 
-schedule.every().day.at("13:20").do(work)
+
+def execute():
+    schedule.every().day.at("11:15").do(work)
+
+    while True:
+        schedule.run_pending()
+        time.sleep(60)
 
 
-
-while True:
-    schedule.run_pending()
-    time.sleep(60)
+if __name__ == "__main__":
+    execute()

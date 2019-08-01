@@ -17,7 +17,7 @@ else:
     # monitored_repoList_filePath = 'data/test_repo_list.txt'
     PR_pairList_filePath_prefix = 'data/consecutive_PR_pairs_'
     # PR_candidate_List_filePath_prefix = 'data/candidate_PR_'
-    PR_candidate_List_filePath = LOCAL_DATA_PATH +'/PRCandidate/'
+    PR_candidate_List_filePath_prefix = LOCAL_DATA_PATH +'/PRCandidate/candidate_PR_'
     repos = [line.rstrip('\n') for line in open(monitored_repoList_filePath)]
     dupPR_result_filePath_prefix = LOCAL_DATA_PATH + '/dupPR/'
     local_pr_data_dir = LOCAL_DATA_PATH + '/pr_data/'
