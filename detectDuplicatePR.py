@@ -134,7 +134,7 @@ def work():
 Set the time for executing the bot every day at certain time
 '''
 def execute():
-    schedule.every().day.at("13:10").do(work)
+    schedule.every().day.at("13:20").do(work)
 
     while True:
         schedule.run_pending()
