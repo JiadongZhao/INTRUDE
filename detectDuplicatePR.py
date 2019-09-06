@@ -130,9 +130,11 @@ def work():
             print("file not exist, continue")
             continue
 
-
+'''
+Set the time for executing the bot every day at certain time
+'''
 def execute():
-    schedule.every().day.at("11:36").do(work)
+    schedule.every().day.at("13:10").do(work)
 
     while True:
         schedule.run_pending()
