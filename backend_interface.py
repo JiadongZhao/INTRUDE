@@ -40,9 +40,9 @@ app = Flask(__name__)
 
 # Connect to MySQL database
 with open('input/mysqlParams.txt') as f:
-    MYSQL_USER, MYSQL_PASS, MYSQL_HOST = f.read().splitlines()
+    MYSQL_USER, MYSQL_PASS, MYSQL_HOST, PORT = f.read().splitlines()
 # conn = mysql.connector.connect(user=MYSQL_USER, password=MYSQL_PASS, host=MYSQL_HOST, database='repolist', port='3306')
-conn = mysql.connector.connect(user=MYSQL_USER, password=MYSQL_PASS, host=MYSQL_HOST, database='fork', port='3307')
+conn = mysql.connector.connect(user=MYSQL_USER, password=MYSQL_PASS, host=MYSQL_HOST, database='fork', port=PORT)
 cur = conn.cursor()
 # Create flag for showing all PR pairs vs one per repo
 show_hide = 'hide'
@@ -53,17 +53,17 @@ show_hide = 'hide'
 
 @app.route('/update-db', methods=['POST'])
 def update_db():
-    # get the current today
-    today_date = datetime.now()
-    today = (datetime.now() - timedelta(2)).isoformat()
+
     if platform.system() == 'Windows':
         path = 'C:\\Users\\annik\\Documents\\REUSE\\interface\\dupPR'
     elif platform.system() == 'Linux':
-        path = '/DATA/luyao'
+        path = '/DATA/luyao/dupPR'
     else:
         path = '/Users/shuruiz/Work/ForkData/INTRUDE'
     # for every file (repository) in the dupPR directory
     for dir_name in os.listdir(path):
+
+        print(dir_name)
         # find path to this file
         filepath = path
         if platform.system() == 'Windows':
@@ -71,9 +71,12 @@ def update_db():
         else:
             filepath += '/'
         filepath += dir_name
+        if not os.path.isdir(filepath):
+            print("not dir " + filepath)
+            continue
         record_date = datetime.strptime(dir_name, '%Y-%m-%d')
-        if ((today_date - record_date).days > 2):
-            print(record_date + "is older than 2 days, skip")
+        if ((datetime.now() - record_date).days > 2):
+            print(str(record_date) + "is older than 2 days, skip")
             continue
 
         for repoPRlist in os.listdir(filepath):
@@ -338,4 +341,4 @@ def load_reject_page():
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True, host='128.2.112.25') # in order to be accessed from remote : https://askubuntu.com/questions/224392/how-to-allow-remote-connections-to-flask/224396

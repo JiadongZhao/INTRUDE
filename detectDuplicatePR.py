@@ -10,6 +10,7 @@ import time
 import detect
 from datetime import datetime, timedelta
 from threading import Timer
+import sys
 
 detect.speed_up = True
 detect.filter_larger_number = True
@@ -23,7 +24,7 @@ detect.filter_version_number_diff = True
 
 add_flag = True
 today_str = ''
-
+repos = []
 
 #
 # get all open PRs to compare this repo to
@@ -92,7 +93,7 @@ def getCandidatePRs(repo):
     return prCandidate_list
 
 
-def work():
+def work(repos):
     x = datetime.today()
     today_str = str(x).split(" ")[0]
     print('today : ' + today_str)
@@ -105,7 +106,8 @@ def work():
         print("Directory ", output_dir, " already exists")
 
     cnt = 0
-    for repo in init.repos:
+
+    for repo in  repos:
         print("get open PRs from repo: " + repo)
         getCandidatePRs(repo)
 
@@ -133,8 +135,12 @@ def work():
 '''
 Set the time for executing the bot every day at certain time
 '''
-def execute():
-    schedule.every().day.at("13:20").do(work)
+def execute(repoList_file):
+    print(repoList_file)
+    repos = [line.rstrip('\n') for line in open(repoList_file)]
+    print(str(len(repos)) + " repos")
+
+    schedule.every().day.at("18:47").do(work, repos)
 
     while True:
         schedule.run_pending()
@@ -142,4 +148,5 @@ def execute():
 
 
 if __name__ == "__main__":
-    execute()
+    execute(sys.argv[1])
+

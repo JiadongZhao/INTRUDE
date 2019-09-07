@@ -21,5 +21,5 @@ Files in input folder:
         
 
 How to execute:
-    python backend_interface.py
+    python3 backend_interface.py
     url: python backend_interface.py
