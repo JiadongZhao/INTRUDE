@@ -98,7 +98,7 @@ def work(repos):
     today_str = str(x).split(" ")[0]
     print('today : ' + today_str)
 
-    output_dir = init.dupPR_result_filePath_prefix + '/' + today_str + '/'
+    output_dir = init.dupPR_result_filePath_prefix  + today_str + '/'
     if not os.path.exists(output_dir):
         os.mkdir(output_dir)
         print("Directory ", output_dir, " Created ")
@@ -106,7 +106,7 @@ def work(repos):
         print("Directory ", output_dir, " already exists")
 
     cnt = 0
-
+    print(str(len(repos)))
     for repo in  repos:
         print("get open PRs from repo: " + repo)
         getCandidatePRs(repo)
@@ -137,16 +137,27 @@ Set the time for executing the bot every day at certain time
 '''
 def execute(repoList_file):
     print(repoList_file)
-    repos = [line.rstrip('\n') for line in open(repoList_file)]
+    repos = []
+
+    for line in open(repoList_file):
+        repos.append(line.split("\t")[0])
     print(str(len(repos)) + " repos")
 
-    schedule.every().day.at("18:47").do(work, repos)
+    exe_time = (datetime.now()+ timedelta(minutes=15)).strftime("%H:%M")
+    print(exe_time + " execute... ")
+    schedule.every().day.at(exe_time).do(work, repos)
 
     while True:
         schedule.run_pending()
         time.sleep(60)
 
 
+
+
 if __name__ == "__main__":
-    execute(sys.argv[1])
+
+    # execute(sys.argv[1])
+    execute("data/repo_PR_2.txt")
+    # repos = ['18F/crime-data-frontend']
+    # work(repos)
 

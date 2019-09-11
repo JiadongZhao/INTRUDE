@@ -23,7 +23,7 @@ renew_pr_list_flag = False
 speed_up = False
 filter_larger_number = False
 filter_out_too_old_pull_flag = True
-filter_already_cite = False
+filter_already_cite = True
 filter_create_after_merge = False
 filter_overlap_author = False
 filter_out_too_big_pull_flag = False
@@ -82,6 +82,7 @@ def have_commit_overlap(p1, p2):
 
 # returns similarity score and feature vector
 def get_topK(repo, num1, topK=10, print_progress=False, use_way='new'):
+    now = datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
     global last_detect_repo
     if last_detect_repo != repo:
         last_detect_repo = repo
@@ -107,6 +108,13 @@ def get_topK(repo, num1, topK=10, print_progress=False, use_way='new'):
     for pull in pulls:
         feature_vector = {}
         cnt += 1
+
+        # if the pr is older than 1 year, ignore
+        current_pr_createdAt = pull['created_at']
+        if (util.timeUtil.days_between(now, current_pr_createdAt) > init.comparePRs_timeWindow_inDays):
+            print(str(pull['number']) + "older than " + str(init.pr_date_difference_inDays) + " days , stop")
+            break
+
 
         # too many changed files check
         if filter_out_too_big_pull_flag:

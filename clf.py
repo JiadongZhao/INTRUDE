@@ -1,3 +1,6 @@
+'''
+Classification Model using Machine Learning.
+'''
 import os
 import re
 import sys
@@ -83,14 +86,25 @@ print('Model Data Save Path = ', model_data_save_path_suffix)
 def init_model_with_pulls(pulls, save_id=None):
     t = [str(pull["title"]) for pull in pulls]
     b = []
+    now = datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
+    candidate_pulls = []
     for pull in pulls:
+        # if the pr is older than 1 year, ignore
+        current_pr_createdAt = pull['created_at']
+        if (util.timeUtil.days_between(now, current_pr_createdAt) > init.comparePRs_timeWindow_inDays):
+            print(str(pull['number']) + "older than " + str(init.pr_date_difference_inDays) + " days , stop")
+            break
+
         if pull["body"] and (len(pull["body"]) <= 2000):
             b.append(pull["body"])
+            candidate_pulls.append(pull)
     init_model_from_raw_docs(t + b, save_id)
 
     if code_sim_type == 'tfidf':
         c = []
-        for pull in pulls:  # only added code
+        print(str(len(candidate_pulls)) + " candidate pulls")
+        for pull in candidate_pulls:  # only added code
+        # for pull in pulls:  # only added code
             try:
                 if not check_large(pull):
                     p = copy.deepcopy(pull)
@@ -110,6 +124,8 @@ def init_model_with_repo(repo, save_id=None):
         save_id = repo.replace('/', '_') + '_allpr'
     else:
         save_id = repo.replace('/', '_') + '_' + save_id
+
+
     try:
         init_model_with_pulls([], save_id)
         # result= init_model_with_pulls([], save_id)
@@ -431,4 +447,4 @@ if __name__ == "__main__":
     # clf_load = joblib.load('filename.pkl')
 
     # Check that the loaded model is the same as the original
-    print('')
+

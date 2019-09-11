@@ -221,7 +221,9 @@ def get_repo_info_forPR(repo, type, renew):
     pullListfile = pathlib.Path(init.local_pr_data_dir + repo + '/pull_list.json')
     if pullListfile.exists():
         tocheck_pr = getOldOpenPRs(repo)
-        print("tocheck_pr " + tocheck_pr)
+        print("tocheck_pr " + str(tocheck_pr))
+        if(tocheck_pr is None):
+            tocheck_pr = 0
 
         save_path = LOCAL_DATA_PATH + '/pr_data/' + repo + '/%s_list.json' % type
         if type == 'fork':
@@ -309,10 +311,12 @@ def get_pull_commit(pull, renew=False):
         try:
             return localfile.get_file(save_path)
         except:
+
             pass
     #     commits = api.request(pull['commits_url'].replace('https://api.github.com/', ''), True)
 
-    commits = api.request(pull['commits_url'].replace('https://api.github.com/', paginate=True, state='all'))
+    commits = api.request(pull['commits_url'].replace('https://api.github.com/',''), paginate=True, state='all')
+    # commits = api.request(pull['commits_url'].replace('https://api.github.com/', paginate=True, state='all'))
     time.sleep(0.7)
     localfile.write_to_file(save_path, commits)
     return commits

@@ -239,6 +239,7 @@ class GitHubAPI(object):
     def request(self, url, method='get', paginate=False, data=None, **params):
         # type: (str, str, bool, str) -> dict
         """ Generic, API version agnostic request method """
+
         timeout_counter = 0
         if paginate:
             paginated_res = []
