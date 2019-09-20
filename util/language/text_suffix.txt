@@ -10,13 +10,10 @@
 .py
 .r
 .cs
-.md
 .make
-.txt
 .mk
 .sh
 .bat
-.xml
 .rss
 .svg
 .rb
@@ -34,5 +31,4 @@
 .hs
 .swift
 .pde
-.markdown
 .asciidoc

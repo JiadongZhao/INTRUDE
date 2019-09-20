@@ -25,9 +25,10 @@ filter_larger_number = False
 filter_out_too_old_pull_flag = True
 filter_already_cite = True
 filter_create_after_merge = False
-filter_overlap_author = False
+filter_overlap_author = True
 filter_out_too_big_pull_flag = False
 filter_same_author_and_already_mentioned = True
+onlyChangedNonCodeFiles_flag = True
 
 filter_version_number_diff = True
 
@@ -93,6 +94,9 @@ def get_topK(repo, num1, topK=10, print_progress=False, use_way='new'):
 
     print("get pr " + str(num1))
     pullA = get_pull(repo, num1)
+
+    if allNonCodeFiles(pullA):
+        return [], None
 
     if filter_already_cite:
         cite[str(pullA["number"])] = get_another_pull(pullA)

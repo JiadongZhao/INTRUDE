@@ -19,7 +19,7 @@ import logging
 import json
 
 logger = logging.getLogger('INTRUDE.scraper')
-
+nonCodeFileExtensionList = [line.rstrip('\n') for line in open('./data/NonCodeFile.txt')]
 # app = Flask(__name__)
 
 # app.config['GITHUB_CLIENT_ID'] = os.environ.get('GITHUB_CLIENT_ID')
@@ -52,9 +52,14 @@ def text2list_precheck(func):
 
 @text2list_precheck
 def get_numbers(text):
-    nums = list(filter(lambda x: len(x) >= 3, re.findall('([0-9]+)', text)))
-    nums = list(set(nums))
-    return nums
+    # todo previous version, got tons of FP crossreferece numbers
+    # nums = list(filter(lambda x: len(x) >= 3, re.findall('([0-9]+)', text)))
+    # nums = list(set(nums))
+
+    # use get_pr_and_issue_numbers instead
+
+
+    return get_pr_and_issue_numbers(text)
 
 
 @text2list_precheck
@@ -75,6 +80,21 @@ def get_pr_and_issue_numbers(text):
     return nums
 
 
+def allNonCodeFiles(pull):
+    file_list = fetch_file_list(pull)
+    print('')
+    total_num_files = len(file_list)
+    noncode_file_count = 0
+    for file in file_list:
+        for extension in nonCodeFileExtensionList:
+            if file['name'].endswith(extension):
+                noncode_file_count += 1
+        if (noncode_file_count == total_num_files):
+            return True
+        else:
+            return False
+
+# This function checks if the PR has changed too many files
 def check_too_big(pull):
     if not ("changed_files" in pull):
         pull = get_pull(pull["base"]["repo"]["full_name"], pull["number"])
@@ -94,6 +114,7 @@ def check_too_big(pull):
 check_large_cache = {}
 
 
+# This function checks if the pull has changed too many files, call check_too_big internally. I am not sure why this is efficient...
 def check_large(pull):
     #     print ("check_large:" + str(pull['number']))
     global check_large_cache
@@ -222,7 +243,7 @@ def get_repo_info_forPR(repo, type, renew):
     if pullListfile.exists():
         tocheck_pr = getOldOpenPRs(repo)
         print("tocheck_pr " + str(tocheck_pr))
-        if(tocheck_pr is None):
+        if (tocheck_pr is None):
             tocheck_pr = 0
 
         save_path = LOCAL_DATA_PATH + '/pr_data/' + repo + '/%s_list.json' % type
@@ -241,7 +262,7 @@ def get_repo_info_forPR(repo, type, renew):
             while (True):
                 ret = api.requestPR('repos/%s/%ss' % (repo, type), state='all', page=page_index)
                 numPR = init.numPRperPage
-                if (len(ret)>0):
+                if (len(ret) > 0):
                     for pr in ret:
                         # if (pr['number'] >= tocheck_pr):
                         if (pr['number'] > tocheck_pr):
@@ -259,6 +280,7 @@ def get_repo_info_forPR(repo, type, renew):
                         numPR += init.numPRperPage
                 else:
                     print("get pulls failed")
+                    return filtered_result
         else:
             if type == 'branch':
                 type = 'branche'
@@ -315,7 +337,7 @@ def get_pull_commit(pull, renew=False):
             pass
     #     commits = api.request(pull['commits_url'].replace('https://api.github.com/', ''), True)
 
-    commits = api.request(pull['commits_url'].replace('https://api.github.com/',''), paginate=True, state='all')
+    commits = api.request(pull['commits_url'].replace('https://api.github.com/', ''), paginate=True, state='all')
     # commits = api.request(pull['commits_url'].replace('https://api.github.com/', paginate=True, state='all'))
     time.sleep(0.7)
     localfile.write_to_file(save_path, commits)
@@ -505,9 +527,9 @@ def getOldOpenPRs(repo):
     latest_pr = 0
     with open(file) as json_file:
         data = json.load(json_file)
-        if(len(data)>0):
+        if (len(data) > 0):
             latest_pr = data[0]['number']
-            print("latest_pr"+str(latest_pr))
+            print("latest_pr" + str(latest_pr))
             for pr in data:
                 number = pr['number']
                 state = pr['state']

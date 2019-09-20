@@ -140,10 +140,22 @@ def execute(repoList_file):
     repos = []
 
     for line in open(repoList_file):
-        repos.append(line.split("\t")[0])
+        repo_str = line.split("\t")[0]
+        if ('learn-co-students' not in repo_str)\
+                and ('document' not in repo_str)\
+                and ('/docs' not in repo_str)\
+                and ('OfficeDocs-OfficeUpdates-test' not in repo_str)\
+                and ('course' not in repo_str)\
+                and ('example' not in repo_str)\
+                and ('homework' not in repo_str)\
+                and ('github.io' not in repo_str)\
+                and ('final_project' not in repo_str)\
+                and ('curso-javascript-ninja' not in repo_str)\
+                and ('codecamp' not in repo_str):
+            repos.append(repo_str)
     print(str(len(repos)) + " repos")
 
-    exe_time = (datetime.now()+ timedelta(minutes=15)).strftime("%H:%M")
+    exe_time = (datetime.now()+ timedelta(minutes=5)).strftime("%H:%M")
     print(exe_time + " execute... ")
     schedule.every().day.at(exe_time).do(work, repos)
 
@@ -156,8 +168,7 @@ def execute(repoList_file):
 
 if __name__ == "__main__":
 
-    # execute(sys.argv[1])
-    execute("data/repo_PR_2.txt")
-    # repos = ['18F/crime-data-frontend']
+    execute(sys.argv[1])
+    # execute("data/repo_PR_2.txt")
+    # repos = ['xilinliu/test-INTRUDE']
     # work(repos)
-

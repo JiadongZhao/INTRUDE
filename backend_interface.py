@@ -35,7 +35,9 @@ import csv
 import os
 import platform
 import PRcommenter
+import scraper
 
+api = scraper.GitHubAPI()
 app = Flask(__name__)
 
 # Connect to MySQL database
@@ -53,7 +55,6 @@ show_hide = 'hide'
 
 @app.route('/update-db', methods=['POST'])
 def update_db():
-
     if platform.system() == 'Windows':
         path = 'C:\\Users\\annik\\Documents\\REUSE\\interface\\dupPR'
     elif platform.system() == 'Linux':
@@ -99,14 +100,7 @@ def update_db():
                     if (len(check) > 0):
                         flag = 1
 
-                    # for every pair already in the db
-                    # for check_line in check:
-                    #     # if they share the same repo name, pr1 name, and pr2 name, flag as already added
-                    #     if (check_line[1] == line[0]) & (check_line[2] == line[1]) & (check_line[3] == line[3]):
-                    #         flag = 1
-                    # if it has not already been added, and if it is newer than 2 days, add it to the db:
                     if (flag == 0):
-                        # print("insert pr pairs %s %s %s " % (repoURL, PR1, PR2))
                         pr_pair_tuple = (
                             repoURL, int(PR1, 10), int(PR2, 10), float(line[4]), float(line[5]), float(line[6]),
                             float(line[7]), float(line[8]), float(line[9]), float(line[10]), float(line[11]),
@@ -117,7 +111,6 @@ def update_db():
                                     pr_pair_tuple)
 
                     else:
-                        # print("update score")
                         pr_pair_update_tuple = (
                             float(line[4]), float(line[5]), float(line[6]),
                             float(line[7]), float(line[8]), float(line[9]), float(line[10]), float(line[11]),
@@ -146,18 +139,18 @@ def update_db():
     #         cur.execute("DELETE FROM duppr_pair WHERE id=%s", (row[0],))
     # # save changes and reload page:
     # conn.commit()
-    load_home()
+    # load_home()
     return load_home()
 
 
 # Switches between show and hide mode
 # Show: all pairs visible. Hide: only one pair per repo visible.
 
-@app.route('/show-hide', methods=['POST'])
-def show_hide_switch():
-    global show_hide
-    show_hide = request.form['show_hide_button']  # check whether user clicked "show" button or "hide" button
-    return load_home()
+# @app.route('/show-hide', methods=['POST'])
+# def show_hide_switch():
+#     global show_hide
+#     show_hide = request.form['show_hide_button']  # check whether user clicked "show" button or "hide" button
+#     return load_home()
 
 
 # Sets toppair value
@@ -166,7 +159,9 @@ def show_hide_switch():
 
 @app.route('/set-toppair')
 def set_toppair(value, pair_id):
-    cur.execute("UPDATE duppr_pair SET toppair=%s WHERE id=%s", (value, pair_id,))
+    sql_str = "UPDATE duppr_pair SET toppair=%s WHERE id=%s" % (value, pair_id,)
+    # print(sql_str)
+    cur.execute(sql_str)
     conn.commit()
     return
 
@@ -198,7 +193,9 @@ def change_toppair():
 def notes():
     note = request.form['notebox']  # get notes from textarea in html
     repo_id = request.form['save_button']  # get repo name
-    cur.execute("UPDATE duppr_pair SET notes=%s WHERE id=%s", (note, repo_id,))  # save notes to db
+    update_sql = "UPDATE duppr_pair SET notes= \'%s\' WHERE id=%s" % (note, repo_id)
+    print(update_sql)
+    cur.execute(update_sql)  # save notes to db
     conn.commit()  # save changes
     return load_home()
 
@@ -208,69 +205,77 @@ def notes():
 # Called during loading of homepage.
 
 @app.route('/top-pair')
-def top_pair():
-    cur.execute("SELECT * FROM duppr_pair ORDER BY timestamp DESC")
+def top_pair_featureBiggerThanDotEight():
+    sql_str = "SELECT * \
+            FROM duppr_pair a\
+            WHERE a.repo COLLATE utf8mb4_unicode_ci NOT IN  (SELECT DISTINCT b.repo FROM dupPR_repo b)\
+                  AND  (score > 0.8 OR title > 0.8 OR description > 0.8 OR patch_content > 0.8 OR patch_content_overlap > 0.8 \
+       or changed_file>0.8 or changed_file_overlap >0.8 or location > 0.8 or location_overlap>0.8 or issue_number = 1 )\
+                  AND (notes NOT LIKE '%FP%' OR notes NOT LIKE '%doc%' OR notes IS NULL)\
+                  AND TIMESTAMPDIFF(DAY, `timestamp`, CURRENT_TIMESTAMP()) <= 2\
+            ORDER BY timestamp DESC;"
+    cur.execute(sql_str)
     data_sorted = cur.fetchall()
-    for row in data_sorted:
-        # make a new list, with all the PR pairs from this repo
-        data_check = []
-        top_already_chosen = 0
-        for row_check in data_sorted:
-            # if both pairs are from the same repo, and if the one we're looking at isn't discarded
-            #   & if the one we're looking at has been chosen as top
-            #     then mark that for this repo, we have a manually chosen pair
-            #   regardless, add the pair we're looking at to the list (of PR pairs within this repo)
-            if (row_check[1] == row[1]) & (row_check[15] != -1):
-                if row_check[20] == -1:
-                    top_already_chosen = 1
-                data_check.append(row_check)
-
-        # if the current pair has not been used or discarded (row[15]==0) and has not been chosen as top
-        #   if it is the most recent pair, then mark as 1 (toppair by timestamp)
-        #   if it's not, then mark as 0 (default)
-        if (row[15] == 0) & (top_already_chosen == 0):
-            if row == data_check[0]:
-                set_toppair(1, row[0])
-            else:
-                set_toppair(0, row[0])
-
-        # if it *has* been discarded and there isn't already a comment sent to this repo
-        # set toppair value to zero (default)
-        elif (row[15] == -1) & (row[20] != 2):
-            set_toppair(0, row[0])
-
-        # if it *has* been used (comment's been sent)
-        # set as top pair for this repo, update all others from this repo
-        elif row[15] == 1:
-            set_toppair(1, row[0])
-            data_check.remove(row)
-            for row_check in data_check:
-                set_toppair(2, row_check[0])
-
-        # if there is a pair in this repo that's been manually picked as top and this is not it
-        # set toppair value to zero (default)
-        elif (top_already_chosen == 1) & (row[20] != -1):
-            set_toppair(0, row[0])
-
     conn.commit()  # save changes
+    print(str(len(data_sorted)))
+    return data_sorted  # return the sorted list of all pairs@app.route('/top-pair')
+
+
+def top_pair_similarityBiggerThanThreshold(threshold):
+    sql_str = "SELECT * \
+               FROM duppr_pair a\
+               WHERE a.repo COLLATE utf8mb4_unicode_ci NOT IN  (SELECT DISTINCT b.repo FROM dupPR_repo b)\
+                     AND  (score >" + threshold + ")\
+                     AND (notes NOT LIKE '%FP%' OR notes NOT LIKE '%doc%' OR notes IS NULL)\
+                     AND TIMESTAMPDIFF(DAY, `timestamp`, CURRENT_TIMESTAMP()) <= 2\
+               ORDER BY timestamp DESC;"
+    cur.execute(sql_str)
+    data_sorted = cur.fetchall()
+    conn.commit()  # save changes
+    print(str(len(data_sorted)))
     return data_sorted  # return the sorted list of all pairs
+
+
+@app.route('/DupPRPair', methods=['POST'])
+def DupPRPair():
+    threshold = request.form['threshold']
+    data_sorted = top_pair_similarityBiggerThanThreshold(threshold)
+    return render_template('interface.html', id="home", data_dups=data_sorted)
 
 
 # Runs upon clicking 'send comment.' Edits comment_sent col in db.
 
 @app.route('/home-sc', methods=['POST'])
 def send_comment():
+    comments_body = request.form['comments']
     pair_id = request.form['send_comment_button']  # get row id (in db) from value of send_comment_button button
     cur.execute("SELECT * FROM duppr_pair WHERE id=%s", (pair_id,))  # get info about pr pair
     pr_info = cur.fetchall()
     pr = int(pr_info[0][2], 10)  # get pr number, type as int
     pr2 = int(pr_info[0][3], 10)  # get number of corresponding pr, type as int
     repo = pr_info[0][1]  # get repo name
-    PRcommenter.make_github_comment(repo, pr, pr2, "")  # send comment
-    cur.execute("UPDATE duppr_pair SET comment_sent=1 WHERE id=%s",
-                (pair_id,))  # change comment_sent value to 1 -- flags as sent
-    conn.commit()  # save changes
-    print(cur.rowcount, "rows updated.")  # terminal notification to inform how many rows (pairs) have been altered
+    # PRcommenter.make_github_comment(repo, pr, pr2, "")  # send comment
+    comment_sent_result = PRcommenter.make_github_comment(repo, pr, pr2, comments_body)  # send comment
+    if (comment_sent_result == "success"):
+        # update duppr_pair row
+        cur.execute("UPDATE duppr_pair SET comment_sent=1 WHERE id=%s",
+                    (pair_id,))  # change comment_sent value to 1 -- flags as sent
+        conn.commit()  # save changes
+        print(cur.rowcount,
+              "rows updated in duppr_pair")  # terminal notification to inform how many rows (pairs) have been altered
+
+        # insert repo into duppr_repo
+        insert_sql = "insert into dupPR_repo (repo, pr1, pr2) values (%s , %s , %s)"
+        # print(insert_sql)
+        cur.execute(insert_sql, (repo, pr, pr2))
+        conn.commit()  # save changes
+        print(cur.rowcount,
+              "rows updated to dupPR_repo")  # terminal notification to inform how many rows (pairs) have been altered
+
+
+    else:
+        print("database not update, because comment sent failed.")
+
     load_home()  # reload page. FYI: not sure why two load_homes are required, but they seem to be.
     return load_home()
 
@@ -292,14 +297,14 @@ def no_send_comment():
 # Runs upon clicking 'reset.' Edits comment_sent col in db.
 # Adds repo (on rejects page) back to home page.
 
-@app.route('/rejects-reset-sc', methods=['POST'])
-def reset_send_comment():
-    pair_id = request.form['reset_button']  # get row id (in db) from value of reset_button button
-    cur.execute("UPDATE duppr_pair SET comment_sent=0 WHERE id=%s",
-                (pair_id,))  # change comment_sent value to 0 (flags for returning to main list)
-    conn.commit()  # save changes
-    print(cur.rowcount, "rows updated.")  # terminal notification to inform how many rows (pairs) have been altered
-    return load_reject_page()
+# @app.route('/rejects-reset-sc', methods=['POST'])
+# def reset_send_comment():
+#     pair_id = request.form['reset_button']  # get row id (in db) from value of reset_button button
+#     cur.execute("UPDATE duppr_pair SET comment_sent=0 WHERE id=%s",
+#                 (pair_id,))  # change comment_sent value to 0 (flags for returning to main list)
+#     conn.commit()  # save changes
+#     print(cur.rowcount, "rows updated.")  # terminal notification to inform how many rows (pairs) have been altered
+#     return load_reject_page()
 
 
 # Render homepage
@@ -308,20 +313,97 @@ def reset_send_comment():
 #   data_dups[] - non-top pairs to be displayed in the homepage (if the show_hide switch is on "show")
 #   data_init[] - all pairs
 
+
+@app.route('/getPRFeatureBiggerThanDotEight', methods=['POST'])
+def getPRFeatureBiggerThanDotEight():
+    data = []
+    data_dups = top_pair_featureBiggerThanDotEight()
+    return render_template('interface.html', data=data, id="home", data_dups=data_dups)
+
+
+@app.route('/updatePRstate', methods=['POST'])
+def updatePRstate():
+    data = []
+    data_dups_update = []
+    data_dups = top_pair_featureBiggerThanDotEight()
+    for line in data_dups:
+        repo, pr1, pr2 = line[1:4]
+
+        # ###  ###  ###  ### get PR state
+        pr1_status = api.pr_status(repo, pr1)
+        pr2_status = api.pr_status(repo, pr2)
+
+        # ###  ###  ###  ### get PR timeline
+        pr1_events = api.get_issue_pr_timeline(repo, pr1)
+        pr2_events = api.get_issue_pr_timeline(repo, pr2)
+        pr1_participant_list, pr1_num_comments = analyzePREvents(pr1_events)
+        pr2_participant_list, pr2_num_comments = analyzePREvents(pr2_events)
+        num_participants_overlap = len(pr1_participant_list.intersection(pr2_participant_list))
+
+        # update to db
+        update_pr_state_db(repo, pr1, pr2, pr1_status, pr2_status, len(pr1_participant_list), len(pr2_participant_list),
+                           pr1_num_comments, pr2_num_comments, num_participants_overlap)
+
+        # update tuple
+        lst = list(line)
+        lst[22] = pr1_status
+        lst[23] = pr2_status
+        lst[24] = pr1_num_comments
+        lst[25] = pr2_num_comments
+        lst[26] = len(pr1_participant_list)
+        lst[27] = len(pr2_participant_list)
+        lst[28] = num_participants_overlap
+
+        newline = tuple(lst)
+        data_dups_update.append(newline)
+
+    return render_template('interface.html', data=data, id="home", data_dups=data_dups_update)
+
+
+def analyzePREvents(PR_events):
+    participant_list = []
+    comment_count = 0
+    for event in PR_events:
+        keys = event.keys()
+        if 'author' in keys:
+            participant_list.append(event['author']['name'])
+        if 'committer' in keys:
+            participant_list.append(event['committer']['name'])
+        if 'actor' in keys:
+            if (event['actor'] is not None) and ('bot' not in event['actor']['login']):
+                participant_list.append(event['actor']['login'])
+        if 'user' in keys:
+            if (event['user'] is not None) and ('bot' not in event['user']['login']):
+                participant_list.append(event['user']['login'])
+        if event['event'] == 'commented':
+            comment_count += 1
+    if 'GitHub' in participant_list:
+        participant_list.remove('GitHub')
+    print(str(len(set(participant_list))) + " participants " + str(comment_count) + " comments")
+    return set(participant_list), comment_count
+
+
 @app.route('/')
 def load_home():
     data = []
-    data_dups = []
-    data_init = top_pair()
-    for row in data_init:  # loop through pr pairs (rows)
-        if row[15] != -1:  # don't display repos for which we've clicked "don't send comment"
-            if (row[20] == 1) or (row[20] == -1):
-                data.append(row)
-            elif (row[20] == 0) & (show_hide == "show"):
-                data_dups.append(row)
-            elif (row[20] == 2) & (show_hide == "show"):
-                data_dups.append(row)
+    data_dups = top_pair_similarityBiggerThanThreshold('0.8')
     return render_template('interface.html', data=data, id="home", data_dups=data_dups)
+
+
+def update_pr_state_db(repo, pr1, pr2, pr1_status, pr2_status, pr1_participant_num, pr2_participant_num,
+                       pr1_num_comments, pr2_num_comments, num_participants_overlap):
+    sql_str = "update duppr_pair " \
+              "set pr1_state = %s, pr2_state = %s, " \
+              "    num_pr1_participants= %s,num_pr2_participants = %s ," \
+              "    num_pr1_comments = %s,num_pr2_comments = %s ," \
+              "    num_overlapped_participants = %s " \
+              "WHERE repo = %s and pr1 =%s and pr2 =%s ;"
+
+    cur.execute(sql_str, (
+        pr1_status, pr2_status, pr1_participant_num, pr2_participant_num, pr1_num_comments, pr2_num_comments,
+        num_participants_overlap, repo, pr1, pr2))
+    conn.commit()  # save changes
+    print("update %s pr status %s %s  %s %s " % (repo, pr1, pr2, pr1_status, pr2_status))
 
 
 # Render page with rejected PR pairs
@@ -329,16 +411,17 @@ def load_home():
 #   data[] - rejected pairs, to be displayed on this page
 #   data_init[] - all pairs
 
-@app.route('/rejects')
-def load_reject_page():
-    cur.execute("SELECT * FROM duppr_pair")  # get all pr pairs from the db
-    data_init = cur.fetchall()
-    data = []
-    for row in data_init:  # loop through pr pairs (rows)
-        if row[15] == -1:  # only display repos for which we've clicked "don't send comment"
-            data.append(row)
-    return render_template('interface.html', data=data, id="rejects", data_dups=[])
+# @app.route('/rejects')
+# def load_reject_page():
+#     cur.execute("SELECT * FROM duppr_pair")  # get all pr pairs from the db
+#     data_init = cur.fetchall()
+#     data = []
+#     for row in data_init:  # loop through pr pairs (rows)
+#         if row[15] == -1:  # only display repos for which we've clicked "don't send comment"
+#             data.append(row)
+#     return render_template('interface.html', data=data, id="rejects", data_dups=[])
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host='128.2.112.25') # in order to be accessed from remote : https://askubuntu.com/questions/224392/how-to-allow-remote-connections-to-flask/224396
+    app.run(debug=True,
+            host='128.2.112.25')  # in order to be accessed from remote : https://askubuntu.com/questions/224392/how-to-allow-remote-connections-to-flask/224396

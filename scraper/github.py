@@ -59,8 +59,8 @@ class GitHubAPIToken(object):
             self.token = token
             self._headers = {
                 "Authorization": "token " + token,
-                "Accept": "application/vnd.github.v3+json",
-                # "Accept": "application/vnd.github.mockingbird-preview"
+                # "Accept": "application/vnd.github.v3+json",
+                "Accept": "application/vnd.github.mockingbird-preview"
 #                 "User-Agent": "request"
            }
         self.limit = {}
@@ -373,6 +373,10 @@ class GitHubAPI(object):
                 'base': base_repo.get('full_name'),
                 'base_branch': base.get('label'),
             }
+    def pr_status(self,repo,pr_id):
+        url = "repos/%s/pulls/%s" % (repo, pr_id)
+        pr = self.request(url)
+        return pr['state']
 
     def pull_request_commits(self, repo, pr_id):
         # type: (str, int) -> Iterable[dict]
@@ -399,6 +403,16 @@ class GitHubAPI(object):
                 'created_at': comment['created_at'],
                 'updated_at': comment['updated_at'],
             }
+
+    def get_issue_pr_timeline(self, repo, issue_id):
+        """ Return timeline on an issue or a pull request
+        :param repo: str 'owner/repo'url
+        :param issue_id: int, either an issue or a Pull Request id
+        """
+        url = "repos/%s/issues/%s/timeline" % (repo, issue_id)
+        print(url)
+        events = self.request(url, paginate=True, state='all')
+        return events
 
     def issue_pr_timeline(self, repo, issue_id):
         """ Return timeline on an issue or a pull request

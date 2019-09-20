@@ -51,8 +51,9 @@ dataset = [
     #     [data_folder + '/testSet_Model2.txt', 0, 'test'],  #model 2
 
     #### consequtive non dup pr pairs
-    [data_folder + '/consecutive_NonDupPR_pairs_training.txt', 0, 'train'],
-    [data_folder + '/consecutive_NonDupPR_pairs_testing.txt', 0, 'test'],
+    [data_folder + '/latest_NonDupPR_training.txt', 0, 'train'],
+    [data_folder + '/latest_NonDupPR_testing.txt', 0, 'test'],
+
 ]
 
 # model save name
@@ -71,6 +72,7 @@ draw_pic = False  # draw PR curve
 draw_roc = False  # draw ROC curve
 model_data_random_shuffle_flag = False
 model_data_renew_flag = False
+dump_model_flag = False
 
 # ------------------------------------------------------------
 
@@ -88,6 +90,7 @@ def init_model_with_pulls(pulls, save_id=None):
     b = []
     now = datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
     candidate_pulls = []
+
     for pull in pulls:
         # if the pr is older than 1 year, ignore
         current_pr_createdAt = pull['created_at']
@@ -103,8 +106,11 @@ def init_model_with_pulls(pulls, save_id=None):
     if code_sim_type == 'tfidf':
         c = []
         print(str(len(candidate_pulls)) + " candidate pulls")
+        # if (len(candidate_pulls) == 0):
+        #     print(str(len(candidate_pulls)) + "candidate pulls, skip")
+        #     return
         for pull in candidate_pulls:  # only added code
-        # for pull in pulls:  # only added code
+            # for pull in pulls:  # only added code
             try:
                 if not check_large(pull):
                     p = copy.deepcopy(pull)
@@ -124,7 +130,6 @@ def init_model_with_repo(repo, save_id=None):
         save_id = repo.replace('/', '_') + '_allpr'
     else:
         save_id = repo.replace('/', '_') + '_' + save_id
-
 
     try:
         init_model_with_pulls([], save_id)
@@ -249,7 +254,8 @@ def classify(model_type=default_model):
                 X_test += new_X
                 y_test += new_y
 
-        def get_ran_shuffle(X, y, train_percent=0.5):
+        def get_random_shuffle(X, y, train_percent=0.5):
+            # https://stackoverflow.com/questions/38190476/use-of-random-state-parameter-in-sklearn-utils-shuffle#targetText=The%20shuffle%20is%20used%20to,random%20seed%20to%20sklearn%20methods.
             X, y = shuffle(X, y, random_state=12345)
             num = len(X)
             train_num = int(num * train_percent)
@@ -257,9 +263,9 @@ def classify(model_type=default_model):
             y_train, y_test = y[:train_num], y[train_num:]
             return (X_train, y_train, X_test, y_test)
 
-        # ran shuffle with train set and test set
+        # random shuffle with train set and test set
         if model_data_random_shuffle_flag:
-            X_train, y_train, X_test, y_test = get_ran_shuffle(X_train + X_test, y_train + y_test)
+            X_train, y_train, X_test, y_test = get_random_shuffle(X_train + X_test, y_train + y_test)
 
         return (X_train, y_train, X_test, y_test)
 
@@ -344,8 +350,9 @@ def classify(model_type=default_model):
 
                 print(acc, average_precision, f1_s, sep='\t')
 
-                # joblib.dump(clf, init.model_saved_path)
-                # # joblib.dump(clf, 'filename.pkl')
+                if dump_model_flag:
+                    now = datetime.now().strftime("%Y-%m-%d")
+                    joblib.dump(clf, init.model_saved_path.replace("saved_model", now + "saved_model"))
                 # print('load existing model')
                 # # clf_load = joblib.load('filename.pkl')
                 # clf_load = joblib.load(init.model_saved_path)
@@ -432,19 +439,16 @@ def classify(model_type=default_model):
 
     # save the model to disk
 
-
     return clf
 
 
 if __name__ == "__main__":
-
     # if not path.exists(init.model_saved_path):
     # print('retrain the model')
     clf = classify()
 # else:
 #     print('load existing model')
-    # Load the pickle file
-    # clf_load = joblib.load('filename.pkl')
+# Load the pickle file
+# clf_load = joblib.load('filename.pkl')
 
-    # Check that the loaded model is the same as the original
-
+# Check that the loaded model is the same as the original
