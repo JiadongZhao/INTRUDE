@@ -2,7 +2,7 @@ import os
 from sklearn.utils import shuffle
 
 from git import *
-from clf import *
+from classify import *
 from comp import *
 
 filter_big = True

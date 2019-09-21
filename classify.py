@@ -239,14 +239,16 @@ def get_feature_vector(data, label, renew=False, out=None):
     return (X, y)
 
 
-# Build classification model
-def classify(model_type=default_model):
+# Train a classification model
+def train_model(model_type=default_model):
     def model_data_prepare(dataset):
         X_train, y_train = [], []
         X_test, y_test = [], []
 
         for s in dataset:
+            # get feature vector
             new_X, new_y = get_feature_vector(s[0], s[1], model_data_renew_flag, model_data_save_path_suffix)
+
             if s[2] == 'train':
                 X_train += new_X
                 y_train += new_y
@@ -273,22 +275,8 @@ def classify(model_type=default_model):
     print('Loading Data')
     X_train, y_train, X_test, y_test = model_data_prepare(dataset)
 
-    '''
-    X_train_new, y_train_new = [], []
-    
-    for i in range(len(y_train)):
-        X_train_new.append(X_train[i])
-        y_train_new.append(y_train[i])
-        if y_train[i] == 0:
-            for j in range(10):
-                X_train_new.append(X_train[i])
-                y_train_new.append(y_train[i])
-
-    X_train, y_train = X_train_new,  y_train_new
-    '''
-
     if part_params:
-        def extract_col(a, c):
+        def extract_experiment_param(a, c):
             for i in range(len(a)):
                 t = []
                 for j in range(len(c)):
@@ -296,8 +284,8 @@ def classify(model_type=default_model):
                         t.append(a[i][j])
                 a[i] = t
 
-        extract_col(X_train, part_params)
-        extract_col(X_test, part_params)
+        extract_experiment_param(X_train, part_params)
+        extract_experiment_param(X_test, part_params)
         print('extract=', part_params)
 
     print('--------------------------')
@@ -445,7 +433,7 @@ def classify(model_type=default_model):
 if __name__ == "__main__":
     # if not path.exists(init.model_saved_path):
     # print('retrain the model')
-    clf = classify()
+    clf = train_model()
 # else:
 #     print('load existing model')
 # Load the pickle file

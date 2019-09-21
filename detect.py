@@ -4,7 +4,7 @@ import sys
 from datetime import datetime, timedelta
 # from sklearn.utils import shuffle
 
-from clf import *
+from classify import *
 from git import *
 from comp import *
 import os

@@ -5,7 +5,7 @@ import importlib
 ways = ['file_list', 'code', 'text', 'location', 'pattern', 'new']
 files = ['data/small_sample_for_precision.txt', 'data/small_sample_for_recall.txt']
 
-import clf
+import classify
 import detect
 
 def run(leave_way, infile):
@@ -33,17 +33,17 @@ def run(leave_way, infile):
     runned_cases = load(out)
 
 
-    importlib.reload(clf)
+    importlib.reload(classify)
     if leave_way == 'text':
-        clf.part_params = [0,0,1,1,1,1,1,1,1]
+        classify.part_params = [0, 0, 1, 1, 1, 1, 1, 1, 1]
     elif leave_way == 'code':
-        clf.part_params = [1,1,0,0,1,1,1,1,1]
+        classify.part_params = [1, 1, 0, 0, 1, 1, 1, 1, 1]
     elif leave_way == 'file_list':
-        clf.part_params = [1,1,1,1,0,0,1,1,1]
+        classify.part_params = [1, 1, 1, 1, 0, 0, 1, 1, 1]
     elif leave_way == 'location':
-        clf.part_params = [1,1,1,1,1,1,0,0,1]
+        classify.part_params = [1, 1, 1, 1, 1, 1, 0, 0, 1]
     elif leave_way == 'pattern':
-        clf.part_params = [1,1,1,1,1,1,1,1,0]
+        classify.part_params = [1, 1, 1, 1, 1, 1, 1, 1, 0]
     elif leave_way != 'new':
         print('------error!-----')
 

@@ -4,7 +4,7 @@ import copy
 
 from datetime import datetime, timedelta
 
-import clf
+import classify
 import comp
 import git
 import fetch_raw_diff
@@ -53,7 +53,7 @@ def simulate(repo, num1, num2):
     global l_repo
     if repo != l_repo:
         l_repo = repo
-        clf.init_model_with_repo(repo)
+        classify.init_model_with_repo(repo)
         
     p1 = git.get_pull(repo, num1)
     p2 = git.get_pull(repo, num2)
@@ -115,11 +115,11 @@ def simulate(repo, num1, num2):
 
     return 1, history, history_ret, history_last, history_commit
 
-m = clf.classify()
+m = classify.classify()
 
 def run(s):
     r, n1, n2 = s.split()
-    clf.init_model_with_repo(r)
+    classify.init_model_with_repo(r)
     simulate(r, n1, n2)
 
 
@@ -154,7 +154,7 @@ if __name__ == '__main__':
             r, n1, n2 = pair_s[0], pair_s[1], pair_s[2]
 
             if r != last_repo:
-                clf.init_model_with_repo(r)
+                classify.init_model_with_repo(r)
                 last_repo = r
             
             status, history, history_ret, history_last, history_commit = simulate(r, n1, n2)

@@ -81,8 +81,15 @@ def get_pr_and_issue_numbers(text):
 
 
 def allNonCodeFiles(pull):
-    file_list = fetch_file_list(pull)
-    print('')
+
+    # file_list = fetch_file_list(pull)
+    try:
+        file_list = fetch_file_list(pull)
+    except:
+        print("file list too big")
+        return True
+        # raise Exception('too big', pull['html_url'])
+
     total_num_files = len(file_list)
     noncode_file_count = 0
     for file in file_list:
