@@ -1,0 +1,4 @@
+['remote "myremote"']
+url = /path/to/remote
+[core]
+remote = myremote
