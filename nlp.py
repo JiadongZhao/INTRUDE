@@ -41,16 +41,17 @@ class Model:
         query_bow = self.dictionary.doc2bow(tokens)
         query_tfidf = self.tfidf[query_bow]
         return query_tfidf
-    
+
+    def query_sim_tfidf(self, tokens1, tokens2):
+        return matutils.cossim(self.get_tfidf(tokens1), self.get_tfidf(tokens2))
+
+
     def get_lsi(self, tokens):
         query_bow = self.dictionary.doc2bow(tokens)
         query_tfidf = self.tfidf[query_bow]
         query_lsi = self.lsi[query_tfidf]
         return query_lsi
-    
-    def query_sim_tfidf(self, tokens1, tokens2):
-        return matutils.cossim(self.get_tfidf(tokens1), self.get_tfidf(tokens2))
-    
+
     def query_sim_lsi(self, tokens1, tokens2):
         return matutils.cossim(self.get_lsi(tokens1), self.get_lsi(tokens2))
     

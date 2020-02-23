@@ -181,18 +181,21 @@ def get_text_sim(A, B):
     B = get_tokens(B)
     if model is None:
         return [list_similarity(A, B)]
-    
-    if text_sim_type == 'lsi':
-        sim = model.query_sim_lsi(A, B)
 
-    if text_sim_type == 'tfidf':
-        sim = model.query_sim_tfidf(A, B)
+    # if text_sim_type == 'lsi':
+    #     sim = model.query_sim_lsi(A, B)
+        sim['lsi'] = model.query_sim_lsi(A, B)
+
+    # if text_sim_type == 'tfidf':
+    #     sim = model.query_sim_tfidf(A, B)
+        sim['tfidf'] = model.query_sim_tfidf(A, B)
 
     # len_mul = model.query_vet_len_mul(A, B)
     len_mul = len(A) * len(B)
 
-    return [sim]
-    
+    # return [sim]
+    return sim
+
     
 code_model = None
 def init_code_model_from_tokens(documents, save_id=None):

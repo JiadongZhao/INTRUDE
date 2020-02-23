@@ -4,11 +4,13 @@ import sys
 from datetime import datetime, timedelta
 # from sklearn.utils import shuffle
 
-from classify import *
 from git import *
 from comp import *
 import os
 import os.path
+from sklearn.externals import joblib
+from tqdm import tqdm
+
 
 if not path.exists(init.model_saved_path):
     print('retrain the model')
@@ -109,7 +111,7 @@ def get_topK(repo, num1, topK=10, print_progress=False, use_way='new'):
     pull_v = {}
 
     # check if any flags are active & violated
-    for pull in pulls:
+    for pull in tqdm(pulls):
         feature_vector = {}
         cnt += 1
 
@@ -177,10 +179,10 @@ def get_topK(repo, num1, topK=10, print_progress=False, use_way='new'):
             if check_version_numbers(pullA, pull):
                 continue
 
-        if print_progress:
-            if cnt % 100 == 0:
-                print('progress = ', 1.0 * cnt / tot)
-                sys.stdout.flush()
+        # if print_progress:
+        #     if cnt % 100 == 0:
+        #         print('progress = ', 1.0 * cnt / tot)
+        #         sys.stdout.flush()
 
         if use_way == 'new':
             feature_vector = get_pr_sim_vector(pullA, pull)

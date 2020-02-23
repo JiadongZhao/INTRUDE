@@ -90,7 +90,9 @@ def get_words_from_file(file, text):
     if text is None:
         return []
 
-    tokens = nltk.word_tokenize(text)
+    tokens = nltk.word_tokenize(text) #["I", "am","a", "Good Robot",""]
+    bigrams = []
+    # TODO: generate an array of bigrams
 
     tokens = list(itertools.chain(*[word_split_by_char(token) for token in tokens]))
     # tokens.extend(list(itertools.chain(*[word_split_by_char(token) for token in origin_tokens]))) # Keep original tokens

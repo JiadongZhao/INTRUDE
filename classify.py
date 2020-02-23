@@ -181,7 +181,7 @@ def get_feature_vector(data, label, renew=False, out=None):
         r, n1, n2 = l.strip().split()
 
         if 'msr_pairs' not in data:
-            print('check if there are too much texts in the PR description.. such as template..')
+            # print('check if there are too much texts in the PR description.. such as template..')
             if check_large(get_pull(r, n1)) or check_large(get_pull(r, n2)):
                 continue
 

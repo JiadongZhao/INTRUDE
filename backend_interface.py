@@ -84,7 +84,6 @@ def update_db():
             print(repoPRlist)
             repo_filepath = filepath + "/" + repoPRlist
             # open this file
-            count = 0
             with open(repo_filepath) as tsv:
                 # for every line (PR pair) in the current file
                 for line in csv.reader(tsv, delimiter="\t"):
@@ -124,8 +123,6 @@ def update_db():
                         cur.execute(update_sql, pr_pair_update_tuple)
 
                     conn.commit()
-                    count += 1
-    print(" inserted " + str(count) + " pr pairs")
     # # grab all pairs from the updated database, and format each in a more friendly way
     # cur.execute("SELECT * FROM duppr_pair")
     # data = cur.fetchall()

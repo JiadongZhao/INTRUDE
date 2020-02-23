@@ -12,6 +12,8 @@ from datetime import datetime, timedelta
 from threading import Timer
 import sys
 
+# from tqdm import tqdm
+
 detect.speed_up = True
 detect.filter_larger_number = True
 detect.filter_out_too_old_pull_flag = True
@@ -25,6 +27,7 @@ detect.filter_version_number_diff = True
 add_flag = True
 today_str = ''
 repos = []
+
 
 #
 # get all open PRs to compare this repo to
@@ -98,7 +101,7 @@ def work(repos):
     today_str = str(x).split(" ")[0]
     print('today : ' + today_str)
 
-    output_dir = init.dupPR_result_filePath_prefix  + today_str + '/'
+    output_dir = init.dupPR_result_filePath_prefix + today_str + '/'
     if not os.path.exists(output_dir):
         os.mkdir(output_dir)
         print("Directory ", output_dir, " Created ")
@@ -132,30 +135,35 @@ def work(repos):
             print("file not exist, continue")
             continue
 
+
 '''
 Set the time for executing the bot every day at certain time
 '''
+
+
 def execute(repoList_file):
     print(repoList_file)
     repos = []
 
     for line in open(repoList_file):
         repo_str = line.split("\t")[0]
-        if ('learn-co-students' not in repo_str)\
-                and ('document' not in repo_str)\
-                and ('/docs' not in repo_str)\
-                and ('OfficeDocs-OfficeUpdates-test' not in repo_str)\
-                and ('course' not in repo_str)\
-                and ('example' not in repo_str)\
-                and ('homework' not in repo_str)\
-                and ('github.io' not in repo_str)\
-                and ('final_project' not in repo_str)\
-                and ('curso-javascript-ninja' not in repo_str)\
+        if ('learn-co-students' not in repo_str) \
+                and ('document' not in repo_str) \
+                and ('/docs' not in repo_str) \
+                and ('OfficeDocs-OfficeUpdates-test' not in repo_str) \
+                and ('course' not in repo_str) \
+                and ('example' not in repo_str) \
+                and ('homework' not in repo_str) \
+                and ('github.io' not in repo_str) \
+                and ('final_project' not in repo_str) \
+                and ('curso-javascript-ninja' not in repo_str) \
+                and ('ironhack-labs' not in repo_str) \
+                and ('LambdaSchool' not in repo_str) \
                 and ('codecamp' not in repo_str):
             repos.append(repo_str)
     print(str(len(repos)) + " repos")
 
-    exe_time = (datetime.now()+ timedelta(minutes=5)).strftime("%H:%M")
+    exe_time = (datetime.now() + timedelta(minutes=5)).strftime("%H:%M")
     print(exe_time + " execute... ")
     schedule.every().day.at(exe_time).do(work, repos)
 
@@ -164,10 +172,7 @@ def execute(repoList_file):
         time.sleep(60)
 
 
-
-
 if __name__ == "__main__":
-
     execute(sys.argv[1])
     # execute("data/repo_PR_2.txt")
     # repos = ['xilinliu/test-INTRUDE']

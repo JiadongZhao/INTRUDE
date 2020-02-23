@@ -170,6 +170,32 @@ def fresh_pr_info(pull):
 
 file_list_cache = {}
 
+def fetch_file_list(pull, renew=False):
+    repo, num = pull["base"]["repo"]["full_name"], str(pull["number"])
+    save_path = LOCAL_DATA_PATH + '/pr_data/' + repo + '/' + num + '/raw_diff.json'
+
+    if os.path.exists(save_path) and (not renew):
+        try:
+            return localfile.get_file(save_path)
+        except:
+            pass
+
+    # t = api.get('repos/%s/pulls/%s/files?page=3' % (repo, num))
+    t = api.request('repos/%s/pulls/%s/files?page=3' % (repo, num))
+    file_list = []
+    if len(t) > 0:
+        raise Exception('too big', pull['html_url'])
+    else:
+        li = api.request('repos/%s/pulls/%s/files' % (repo, num), paginate=True)
+        # li = api.request( 'repos/%s/pulls/%s/files' % (repo, num), True)
+        time.sleep(0.8)
+        for f in li:
+            if f.get('changes', 0) <= 5000 and ('filename' in f) and ('patch' in f):
+                file_list.append(fetch_raw_diff.parse_diff(f['filename'], f['patch']))
+
+    localfile.write_to_file(save_path, file_list)
+    return file_list
+
 
 def fetch_pr_info(pull, must_in_local=False):
     #     print ("fetch_pr_info:" + str(pull['number']))
@@ -374,31 +400,6 @@ def get_another_pull(pull, renew=False):
     return result
 
 
-def fetch_file_list(pull, renew=False):
-    repo, num = pull["base"]["repo"]["full_name"], str(pull["number"])
-    save_path = LOCAL_DATA_PATH + '/pr_data/' + repo + '/' + num + '/raw_diff.json'
-
-    if os.path.exists(save_path) and (not renew):
-        try:
-            return localfile.get_file(save_path)
-        except:
-            pass
-
-    # t = api.get('repos/%s/pulls/%s/files?page=3' % (repo, num))
-    t = api.request('repos/%s/pulls/%s/files?page=3' % (repo, num))
-    file_list = []
-    if len(t) > 0:
-        raise Exception('too big', pull['html_url'])
-    else:
-        li = api.request('repos/%s/pulls/%s/files' % (repo, num), paginate=True)
-        # li = api.request( 'repos/%s/pulls/%s/files' % (repo, num), True)
-        time.sleep(0.8)
-        for f in li:
-            if f.get('changes', 0) <= 5000 and ('filename' in f) and ('patch' in f):
-                file_list.append(fetch_raw_diff.parse_diff(f['filename'], f['patch']))
-
-    localfile.write_to_file(save_path, file_list)
-    return file_list
 
 
 pull_commit_sha_cache = {}

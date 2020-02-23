@@ -1,4 +1,2 @@
-['remote "myremote"']
-url = /path/to/remote
-[core]
-remote = myremote
+['remote "intrude-remote"']
+url = /data
